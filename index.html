@@ -115,7 +115,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.3</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.4</span></p>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <div onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
@@ -189,7 +189,7 @@
                 </div>
                 <div class="quiz-action-bar">
                     <button id="next-btn" onclick="nextQuestion()" class="hidden text-white px-8 py-3 rounded-xl font-bold" style="background:var(--text)">Next →</button>
-                    <button id="submit-quiz-btn" onclick="revealStaffScore()" class="hidden text-white px-10 py-3 rounded-xl font-bold uppercase text-sm" style="background:var(--success)">Submit Intel</button>
+                    <button id="submit-quiz-btn" onclick="revealStaffScore()" class="hidden text-white px-10 py-3 rounded-xl font-bold uppercase text-sm" style="background:var(--success)">Submit</button>
                 </div>
             </div>
         </div>
@@ -268,6 +268,8 @@
                     <p class="text-[11px]" style="color:var(--text-muted)">Add context so AI-generated practice questions reflect what your outlet needs to focus on.</p>
                     <select id="note-topic" onchange="renderOutletNoteDisplay()" class="w-full p-3 rounded-lg border bg-white text-sm" style="border-color:var(--border)"></select>
                     <textarea id="note-body" placeholder="e.g. Focus on cold-chain storage — we had 2 near-misses this month." class="w-full p-3 rounded-lg border h-20 text-sm" style="border-color:var(--border)"></textarea>
+                    <p class="text-[11px] font-bold pt-1" style="color:var(--accent-dark)">Or pick specific resources to quiz from:</p>
+                    <div id="note-resource-picker" class="bg-white rounded-lg border max-h-44 overflow-y-auto p-2 space-y-1 text-sm" style="border-color:var(--border)"></div>
                     <button onclick="saveOutletNote()" class="w-full btn-ai p-3 rounded-lg font-bold text-sm">Save Notes</button>
                 </div>
 
@@ -400,6 +402,14 @@
                 <button onclick="loginSupervisor()" class="w-full btn-grad p-4 rounded-xl font-bold">LOGIN</button>
             </div>
         </div>
+    </div>
+
+    <div id="fullscreen-reader" class="hidden fixed inset-0 z-[200]" style="background:var(--surface)">
+        <div class="flex justify-between items-center p-4 border-b" style="border-color:var(--border)">
+            <p id="reader-title" class="font-bold font-display truncate pr-4"></p>
+            <button onclick="closeFullscreenReader()" class="flex-shrink-0 font-bold text-sm px-4 py-2 rounded-xl" style="background:var(--bg);color:var(--text-muted)">✕ Close</button>
+        </div>
+        <div id="reader-body" class="overflow-y-auto" style="height:calc(100% - 65px)"></div>
     </div>
 
     <script>
@@ -603,22 +613,39 @@
         function renderOutletNoteDisplay() {
             const topic = document.getElementById('note-topic').value;
             const box = document.getElementById('note-body');
-            if(!topic) { box.value = ''; box.placeholder = 'Pick a topic first...'; return; }
+            if(!topic) { box.value = ''; box.placeholder = 'Pick a topic first...'; document.getElementById('note-resource-picker').innerHTML = ''; return; }
             const n = allOutletNotes.find(x => (x.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase() && (x.Topic||"").toString().trim() === topic);
             box.value = n ? n.Notes : '';
             box.placeholder = 'e.g. Focus on cold-chain storage — we had 2 near-misses this month.';
+            renderResourcePicker(topic, n);
+        }
+
+        function renderResourcePicker(topic, savedNote) {
+            const picker = document.getElementById('note-resource-picker');
+            const savedIds = savedNote && savedNote.SelectedResources ? savedNote.SelectedResources.toString().split(',').map(s => s.trim()).filter(Boolean) : [];
+            const contentItems = allContent.map(c => ({ id: c.ID, label: `${c.Title} — ${c.Category||'Note'}` }));
+            const docItems = allReferenceDocs.map(d => ({ id: d.ID, label: `${d.Name} — ${d.Kind}` }));
+            const all = [...contentItems, ...docItems];
+            picker.innerHTML = all.length ? all.map(item => `
+                <label class="flex items-center gap-2 py-1 cursor-pointer">
+                    <input type="checkbox" value="${item.id}" ${savedIds.includes(item.id) ? 'checked' : ''} class="note-resource-checkbox flex-shrink-0">
+                    <span class="truncate">${item.label}</span>
+                </label>`).join('') : '<p class="text-xs italic px-1" style="color:var(--text-muted)">No resources in the Knowledge Base yet.</p>';
         }
 
         function saveOutletNote() {
             const topic = document.getElementById('note-topic').value;
             const notes = document.getElementById('note-body').value.trim();
             if(!topic) return alert("Pick a topic first.");
-            const p = { action: 'save_outlet_note', outlet: currentOutletMgrOutlet, topic, notes, manager: 'Outlet Manager - ' + currentOutletMgrOutlet };
+            const selectedResources = [...document.querySelectorAll('.note-resource-checkbox:checked')].map(cb => cb.value);
+            const p = { action: 'save_outlet_note', outlet: currentOutletMgrOutlet, topic, notes, manager: 'Outlet Manager - ' + currentOutletMgrOutlet, selectedResources };
             const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
             if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
             else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
             const idx = allOutletNotes.findIndex(x => (x.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase() && (x.Topic||"").toString().trim() === topic);
-            if(idx > -1) allOutletNotes[idx].Notes = notes; else allOutletNotes.push({ Outlet: currentOutletMgrOutlet, Topic: topic, Notes: notes });
+            const selectedStr = selectedResources.join(',');
+            if(idx > -1) { allOutletNotes[idx].Notes = notes; allOutletNotes[idx].SelectedResources = selectedStr; }
+            else allOutletNotes.push({ Outlet: currentOutletMgrOutlet, Topic: topic, Notes: notes, SelectedResources: selectedStr });
             alert("Notes saved. AI Practice for this topic will factor these in.");
         }
 
@@ -691,45 +718,71 @@
             renderKBList();
         }
 
+        function openFullscreenReader(title, bodyHtml) {
+            document.getElementById('reader-title').innerText = title;
+            document.getElementById('reader-body').innerHTML = bodyHtml;
+            document.getElementById('fullscreen-reader').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeFullscreenReader() {
+            document.getElementById('fullscreen-reader').classList.add('hidden');
+            document.getElementById('reader-body').innerHTML = '';
+            document.body.style.overflow = '';
+        }
+        function openReaderForContent(id) {
+            const c = allContent.find(x => x.ID === id);
+            if (!c) return;
+            const bodyHtml = `<div class="p-6 max-w-2xl mx-auto">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="badge" style="background:var(--primary-soft);color:var(--primary-dark)">${c.Category||'Note'}</span>
+                    <span class="text-xs font-bold" style="color:var(--text-muted)">${c.Topic}</span>
+                </div>
+                <p class="text-lg leading-relaxed whitespace-pre-line">${c.Body}</p>
+                ${c.Link ? `<a href="${c.Link}" target="_blank" class="inline-block mt-4 text-sm font-bold underline" style="color:var(--primary)">Open Linked Resource ↗</a>` : ''}
+            </div>`;
+            openFullscreenReader(c.Title, bodyHtml);
+        }
+        function openReaderForDoc(id) {
+            const d = allReferenceDocs.find(x => x.ID === id);
+            if (!d) return;
+            openFullscreenReader(d.Name, `<iframe src="${d.PreviewURL}" class="w-full h-full border-0" loading="lazy"></iframe>`);
+        }
+
         function resourceCardHtml(c) {
             return `
                 <div class="bg-white p-4 rounded-xl border mb-3" style="border-color:var(--border)">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="badge" style="background:var(--primary-soft);color:var(--primary-dark)">${c.Category||'Note'}</span>
-                        <span class="text-[9px] font-bold" style="color:var(--text-muted)">${c.Topic}</span>
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="min-w-0">
+                            <span class="badge" style="background:var(--primary-soft);color:var(--primary-dark)">${c.Category||'Note'}</span>
+                            <span class="text-[9px] font-bold ml-1" style="color:var(--text-muted)">${c.Topic}</span>
+                            <p class="font-bold mt-1">${c.Title}</p>
+                        </div>
+                        <button onclick="openReaderForContent('${c.ID}')" class="flex-shrink-0 text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
                     </div>
-                    <p class="font-bold">${c.Title}</p>
-                    <p class="text-sm mt-1 whitespace-pre-line" style="color:var(--text-muted)">${c.Body}</p>
+                    <p class="text-sm mt-1 line-clamp-2" style="color:var(--text-muted)">${c.Body}</p>
                     ${c.Link ? `<a href="${c.Link}" target="_blank" class="text-xs font-bold underline mt-2 inline-block" style="color:var(--primary)">Open Resource ↗</a>` : ''}
                 </div>`;
         }
 
-        // Resources are grouped into 3 sections for browsing. "Notes & Guidelines"
-        // combines the Note and Guideline categories; SOP and Training Material
-        // each get their own section. (Adding still offers all 4 categories.)
         function referenceDocHtml(d) {
             return `
-                <div class="bg-white p-4 rounded-xl border mb-3" style="border-color:var(--border)">
-                    <div class="flex justify-between items-center gap-2">
-                        <div class="min-w-0">
-                            <span class="badge" style="background:var(--accent-soft);color:var(--accent-dark)">${d.Kind}</span>
-                            <p class="font-bold mt-1 truncate">${d.Name}</p>
-                        </div>
-                        <div class="flex gap-2 flex-shrink-0">
-                            <button onclick="toggleDocPreview('${d.ID}')" class="text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
-                            <a href="${d.DownloadURL}" target="_blank" class="text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border)">Download</a>
-                        </div>
+                <div class="bg-white p-4 rounded-xl border mb-3 flex justify-between items-center gap-2" style="border-color:var(--border)">
+                    <div class="min-w-0">
+                        <span class="badge" style="background:var(--accent-soft);color:var(--accent-dark)">${d.Kind}</span>
+                        <p class="font-bold mt-1 truncate">${d.Name}</p>
                     </div>
-                    <div id="doc-preview-${d.ID}" class="hidden mt-3">
-                        <iframe src="${d.PreviewURL}" class="w-full rounded-lg border" style="height:70vh;border-color:var(--border)" loading="lazy"></iframe>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="openReaderForDoc('${d.ID}')" class="text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
+                        <a href="${d.DownloadURL}" target="_blank" class="text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border)">Download</a>
                     </div>
                 </div>`;
         }
 
-        function toggleDocPreview(id) {
-            document.getElementById('doc-preview-' + id).classList.toggle('hidden');
-        }
-
+        // Resources are grouped into 4 sections. Manually-typed Knowledge Base
+        // entries slot in by their Category; auto-discovered Drive files slot in
+        // by which of the 4 named subfolders they were found in (see backend).
+        // Drive files aren't topic-tagged, so the topic filter only affects
+        // manually-typed entries.
         function renderResourceList() {
             const f = document.getElementById('res-topic-filter').value || 'ALL';
             const items = allContent.filter(c => f === 'ALL' || c.Topic === f);
@@ -738,24 +791,21 @@
             const icoDoc = '<svg viewBox="0 0 24 24" class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 12h5M9.5 15.5h5"/></svg>';
             const icoFolder = '<svg viewBox="0 0 24 24" class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5A1.5 1.5 0 0 1 19.5 20h-15A1.5 1.5 0 0 1 3 18.5v-12z"/></svg>';
             const sections = [
-                { label: 'SOP Compilation', icon: icoClipboard, match: c => (c.Category||'') === 'SOP' },
-                { label: 'Training Materials', icon: icoBook, match: c => (c.Category||'') === 'Training Material' },
-                { label: 'Notes & Guidelines', icon: icoDoc, match: c => (c.Category||'') === 'Note' || (c.Category||'') === 'Guideline' }
+                { label: 'SOP Compilation', icon: icoClipboard, matchContent: c => (c.Category||'') === 'SOP' },
+                { label: 'Training Materials', icon: icoBook, matchContent: c => (c.Category||'') === 'Training Material' },
+                { label: 'Notes & Guidelines', icon: icoDoc, matchContent: c => (c.Category||'') === 'Note' || (c.Category||'') === 'Guideline' },
+                { label: 'Reference Documents', icon: icoFolder, matchContent: () => false }
             ];
-            const refDocsHtml = `
-                <div class="mb-6">
-                    <p class="text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1.5" style="color:var(--accent-dark)">${icoFolder} Reference Documents <span style="color:var(--text-muted)">(${allReferenceDocs.length})</span></p>
-                    ${allReferenceDocs.length ? allReferenceDocs.map(referenceDocHtml).join('') : `<p class="text-xs italic py-2" style="color:var(--text-muted)">Nothing dropped in the reference folder yet.</p>`}
-                </div>`;
-            const categoryHtml = sections.map(sec => {
-                const arr = items.filter(sec.match);
+            document.getElementById('res-list').innerHTML = sections.map(sec => {
+                const contentArr = items.filter(sec.matchContent);
+                const docArr = allReferenceDocs.filter(d => d.Category === sec.label);
+                const total = contentArr.length + docArr.length;
                 return `
                 <div class="mb-6">
-                    <p class="text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1.5" style="color:var(--primary)">${sec.icon} ${sec.label} <span style="color:var(--text-muted)">(${arr.length})</span></p>
-                    ${arr.length ? arr.map(resourceCardHtml).join('') : `<p class="text-xs italic py-2" style="color:var(--text-muted)">Nothing here yet.</p>`}
+                    <p class="text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1.5" style="color:var(--primary)">${sec.icon} ${sec.label} <span style="color:var(--text-muted)">(${total})</span></p>
+                    ${total ? (docArr.map(referenceDocHtml).join('') + contentArr.map(resourceCardHtml).join('')) : `<p class="text-xs italic py-2" style="color:var(--text-muted)">Nothing here yet.</p>`}
                 </div>`;
             }).join('');
-            document.getElementById('res-list').innerHTML = refDocsHtml + categoryHtml;
         }
 
         /** AI QUIZ GENERATION **/
@@ -978,7 +1028,7 @@
             isAIQuiz = false;
             isQuizRunning = true;
             document.getElementById('quiz-mode-badge').classList.add('hidden');
-            document.getElementById('submit-quiz-btn').innerText = 'Submit Intel';
+            document.getElementById('submit-quiz-btn').innerText = 'Submit';
             renderQuestion(); showView('view-quiz');
         }
         function exportComprehensiveCSV() {
@@ -989,7 +1039,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.3.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.4.csv`; l.click();
         }
     </script>
 </body>
