@@ -115,7 +115,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.6</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.8</span></p>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <div onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
@@ -269,7 +269,7 @@
 
                 <div class="p-4 rounded-2xl space-y-2 border" style="background:var(--accent-soft);border-color:var(--accent)">
                     <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/></svg>Create AI Practice Quiz</p>
-                    <p class="text-[11px]" style="color:var(--text-muted)">Pick a topic or a specific resource, choose how many questions, generate — then share the code with your team.</p>
+                    <p class="text-[11px]" style="color:var(--text-muted)">Pick a resource from your Knowledge Base, choose how many questions, generate — then share the code with your team.</p>
                     <select id="quiz-source-select" class="w-full p-3 rounded-lg border bg-white text-sm" style="border-color:var(--border)"></select>
                     <div class="flex gap-2 items-center">
                         <span class="text-[11px] font-bold flex-shrink-0" style="color:var(--accent-dark)">Questions:</span>
@@ -617,18 +617,32 @@
         }
 
         function populateOutletMgrDropdowns() {
-            const allTopics = getAllTopics();
-            document.getElementById('ai-monitor-topic-filter').innerHTML = '<option value="ALL">All topics</option>' + allTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+            // The monitor filter is built from topics that actually appear in this
+            // outlet's AI attempts — this naturally includes resource-derived labels
+            // (e.g. a quiz generated from a specific SOP).
+            const outletAITopics = [...new Set(allAIResults
+                .filter(r => (r.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase())
+                .map(r => (r.Topic||"").toString().trim())
+            )].filter(Boolean).sort();
+            document.getElementById('ai-monitor-topic-filter').innerHTML = '<option value="ALL">All topics & resources</option>' + outletAITopics.map(t => `<option value="${t}">${t}</option>`).join('');
 
-            const topicOpts = allTopics.map(t => `<option value="topic:${t}">${t}</option>`).join('');
-            const resourceOpts = [
-                ...allContent.map(c => `<option value="resource:${c.ID}">${c.Title} — ${c.Category||'Note'}</option>`),
-                ...allReferenceDocs.map(d => `<option value="resource:${d.ID}">${d.Name} — ${d.Kind}</option>`)
-            ].join('');
-            document.getElementById('quiz-source-select').innerHTML =
-                '<option value="">Select topic or resource...</option>' +
-                (topicOpts ? `<optgroup label="Standard Topics">${topicOpts}</optgroup>` : '') +
-                (resourceOpts ? `<optgroup label="Resources">${resourceOpts}</optgroup>` : '');
+            // Quiz source is resources only — "standard topics" aren't a reliable
+            // source since a topic string on a quiz question has no guaranteed
+            // content behind it. Grouped the same way as the Resources page so
+            // the two stay consistent.
+            const sections = [
+                { label: 'SOP Compilation', matchContent: c => (c.Category||'') === 'SOP' },
+                { label: 'Training Materials', matchContent: c => (c.Category||'') === 'Training Material' },
+                { label: 'Notes & Guidelines', matchContent: c => (c.Category||'') === 'Note' || (c.Category||'') === 'Guideline' },
+                { label: 'Reference Documents', matchContent: () => false }
+            ];
+            const optgroups = sections.map(sec => {
+                const contentOpts = allContent.filter(sec.matchContent).map(c => `<option value="resource:${c.ID}">${c.Title}</option>`);
+                const docOpts = allReferenceDocs.filter(d => d.Category === sec.label).map(d => `<option value="resource:${d.ID}">${d.Name} (${d.Kind})</option>`);
+                const opts = [...contentOpts, ...docOpts].join('');
+                return opts ? `<optgroup label="${sec.label}">${opts}</optgroup>` : '';
+            }).join('');
+            document.getElementById('quiz-source-select').innerHTML = '<option value="">Select a resource...</option>' + optgroups;
         }
 
         async function createAIQuiz() {
@@ -636,7 +650,7 @@
             if(!raw) return alert("Pick a topic or resource first.");
             const [sourceType, ...rest] = raw.split(':');
             const sourceValue = rest.join(':');
-            const topicLabel = document.getElementById('quiz-source-select').selectedOptions[0].innerText.split(' — ')[0];
+            const topicLabel = document.getElementById('quiz-source-select').selectedOptions[0].innerText;
             const count = parseInt(document.getElementById('quiz-source-count').value) || 10;
             const extraNotes = document.getElementById('quiz-source-notes').value.trim();
             const manager = 'Outlet Manager - ' + currentOutletMgrOutlet;
@@ -651,7 +665,9 @@
                 if(data.error) throw new Error(data.error);
                 if(!data.passcode) throw new Error("Server didn't return a passcode.");
                 document.getElementById('quiz-passcode-value').innerText = data.passcode;
-                document.getElementById('quiz-passcode-meta').innerText = `${data.count} question(s) · "${data.topic}" · share this with your team`;
+                const expiresAt = new Date(Date.now() + (data.expiresInMinutes || 60) * 60000);
+                const expiresLabel = expiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                document.getElementById('quiz-passcode-meta').innerText = `${data.count} question(s) · "${data.topic}" · expires ${expiresLabel} · share this with your team`;
                 document.getElementById('quiz-passcode-display').classList.remove('hidden');
             } catch(e) {
                 alert("Quiz generation failed: " + e.message);
@@ -662,21 +678,38 @@
         function renderAIResultsForOutlet() {
             const f = document.getElementById('ai-monitor-topic-filter').value || 'ALL';
             const list = document.getElementById('ai-monitor-list');
-            const rows = allAIResults.filter(r => (r.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase() && (f === 'ALL' || (r.Topic||"").toString().trim() === f))
-                .sort((a,b) => new Date(b.Timestamp) - new Date(a.Timestamp));
+            const rows = allAIResults.filter(r => (r.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase() && (f === 'ALL' || (r.Topic||"").toString().trim() === f));
             if(!rows.length) { list.innerHTML = '<p class="text-center text-sm py-6" style="color:var(--text-muted)">No AI practice attempts yet for this outlet.</p>'; return; }
-            list.innerHTML = rows.map(r => {
-                const wrongs = allAIWrongAnswers.filter(w => w.AttemptID === r.AttemptID);
-                const wrongHtml = wrongs.length ? wrongs.map(w => `<div class="p-2 rounded border mb-1 bg-white"><p class="font-bold text-[11px]" style="color:var(--danger-dark)">Q: ${w["Question Text"]}</p><p class="font-black text-[11px] mt-1" style="color:var(--success)">✓ Correct: ${w["Correct Answer"]}</p></div>`).join('') : '<p class="text-[11px]" style="color:var(--text-muted)">Perfect score — no missed questions.</p>';
+
+            // Group every attempt under its topic (or resource-derived label) so
+            // all staff who took the same quiz show up together.
+            const groups = {};
+            rows.forEach(r => {
+                const t = (r.Topic || 'General').toString().trim() || 'General';
+                if(!groups[t]) groups[t] = [];
+                groups[t].push(r);
+            });
+
+            list.innerHTML = Object.entries(groups).map(([topic, attempts]) => {
+                attempts.sort((a,b) => new Date(b.Timestamp) - new Date(a.Timestamp));
+                const attemptsHtml = attempts.map(r => {
+                    const wrongs = allAIWrongAnswers.filter(w => w.AttemptID === r.AttemptID);
+                    const wrongHtml = wrongs.length ? wrongs.map(w => `<div class="p-2 rounded border mb-1 bg-white"><p class="font-bold text-[11px]" style="color:var(--danger-dark)">Q: ${w["Question Text"]}</p><p class="font-black text-[11px] mt-1" style="color:var(--success)">✓ Correct: ${w["Correct Answer"]}</p></div>`).join('') : '<p class="text-[11px]" style="color:var(--text-muted)">Perfect score — no missed questions.</p>';
+                    return `
+                    <details class="rounded-xl border p-3" style="border-color:var(--border)">
+                        <summary class="flex justify-between items-center cursor-pointer font-bold text-sm">
+                            <span class="uppercase">${r.Name}</span>
+                            <span class="font-data" style="color:var(--accent-dark)">${r.Percentage}</span>
+                        </summary>
+                        <p class="text-[10px] mt-1" style="color:var(--text-muted)">${r.Score}${r.Passcode ? ' · code ' + r.Passcode : ''}</p>
+                        <div class="mt-2 space-y-1">${wrongHtml}</div>
+                    </details>`;
+                }).join('');
                 return `
-                <details class="rounded-xl border p-3" style="border-color:var(--border)">
-                    <summary class="flex justify-between items-center cursor-pointer font-bold text-sm">
-                        <span class="uppercase">${r.Name}</span>
-                        <span class="font-data" style="color:var(--accent-dark)">${r.Percentage}</span>
-                    </summary>
-                    <p class="text-[10px] mt-1" style="color:var(--text-muted)">${r.Topic} · ${r.Score}${r.Passcode ? ' · code ' + r.Passcode : ''}</p>
-                    <div class="mt-2 space-y-1">${wrongHtml}</div>
-                </details>`;
+                <div class="mb-4">
+                    <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:var(--primary)">${topic} <span style="color:var(--text-muted)">(${attempts.length} attempt${attempts.length > 1 ? 's' : ''})</span></p>
+                    <div class="space-y-2">${attemptsHtml}</div>
+                </div>`;
             }).join('');
         }
 
@@ -1076,7 +1109,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.6.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.8.csv`; l.click();
         }
     </script>
 </body>
