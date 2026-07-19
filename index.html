@@ -101,6 +101,13 @@
         <p id="loader-text" class="mt-4 font-bold font-display animate-pulse" style="color:var(--primary)">Loading...</p>
     </div>
 
+    <div id="sync-error" class="loader-overlay hidden">
+        <div class="text-5xl mb-3">⚠️</div>
+        <p class="font-bold font-display text-center px-6" style="color:var(--danger)">Couldn't connect to the server</p>
+        <p class="text-sm text-center px-10 mt-1" style="color:var(--text-muted)">Check your internet connection, then try again.</p>
+        <button onclick="fetchData()" class="btn-grad px-8 py-3 rounded-xl font-bold mt-5">Retry</button>
+    </div>
+
     <div class="max-w-4xl mx-auto">
         <div id="view-main" class="animate__animated animate__fadeIn">
             <header class="text-center mb-8 hero-texture rounded-3xl py-6">
@@ -115,7 +122,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.9</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.11</span></p>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <div onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
@@ -182,7 +189,7 @@
         <div id="view-quiz" class="hidden">
             <div class="glass p-6 rounded-3xl">
                 <div class="flex justify-between items-center mb-3">
-                    <button id="quiz-back-btn" onclick="location.reload()" class="nav-btn font-bold" style="color:var(--text-muted)">← Exit</button>
+                    <button id="quiz-back-btn" onclick="exitQuizWithAutosave()" class="nav-btn font-bold" style="color:var(--text-muted)">← Exit</button>
                     <div id="quiz-progress" class="font-bold font-data px-3 py-1 rounded-full text-sm" style="color:var(--primary);background:var(--primary-soft)">Q 1</div>
                 </div>
                 <div id="quiz-mode-badge" class="hidden badge mb-2 inline-flex items-center gap-1" style="color:var(--accent-dark);background:var(--accent-soft)"><svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/></svg>AI PRACTICE — shared with your outlet manager</div>
@@ -207,6 +214,10 @@
                     <div id="hub-final-perc" class="text-6xl md:text-7xl font-bold font-data" style="color:var(--primary)">0%</div>
                     <p id="hub-final-score" class="text-lg font-bold mt-2" style="color:var(--text-muted)">Score: 0/0</p>
                 </div>
+                <div id="hub-review-wrap" class="hidden text-left">
+                    <button onclick="document.getElementById('hub-review-list').classList.toggle('hidden')" class="w-full text-xs font-bold uppercase tracking-widest py-2" style="color:var(--danger)">Review your answers ↕</button>
+                    <div id="hub-review-list" class="hidden space-y-2 max-h-64 overflow-y-auto"></div>
+                </div>
                 <p id="hub-sync-note" class="text-sm italic" style="color:var(--text-muted)">Syncing with database...</p>
                 <button id="hub-save-btn" onclick="saveQuizResult()" class="w-full btn-grad p-5 rounded-2xl font-bold text-lg uppercase tracking-widest">Archive & Exit</button>
             </div>
@@ -217,14 +228,14 @@
                 <div class="flex justify-between items-center mb-4 gap-2">
                     <button onclick="goHome()" class="nav-btn font-bold flex-shrink-0" style="color:var(--primary)">← Back</button>
                     <h2 class="text-lg md:text-xl font-bold font-display text-center flex-1 flex items-center justify-center gap-2" style="color:var(--resources)"><svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg>Training Resources</h2>
-                    <button id="res-manage-btn" onclick="unlockResourceManager()" class="nav-btn font-bold text-xs px-3 py-2 rounded-xl flex-shrink-0 flex items-center gap-1.5" style="background:var(--accent-soft);color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>Manage</button>
+                    <button id="res-manage-btn" onclick="unlockResourceManager()" class="nav-btn font-bold text-xs px-3 rounded-xl flex-shrink-0 flex items-center gap-1.5 min-h-[40px]" style="background:var(--accent-soft);color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>Manage</button>
                 </div>
                 <select id="res-topic-filter" onchange="renderResourceList()" class="w-full p-3 rounded-xl border mb-4 bg-white font-bold text-sm" style="border-color:var(--border)"></select>
 
                 <div id="resource-manager-panel" class="hidden mb-6 p-4 rounded-2xl border space-y-3" style="background:var(--accent-soft);border-color:var(--accent)">
                     <div class="flex justify-between items-center">
                         <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.2L15.8 5a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.2 19 4 20z"/><path d="M14 6.5l3.5 3.5"/></svg>Add / Manage Resources</p>
-                        <button onclick="document.getElementById('resource-manager-panel').classList.add('hidden')" class="text-sm font-bold" style="color:var(--accent-dark)">✕ Close</button>
+                        <button onclick="document.getElementById('resource-manager-panel').classList.add('hidden')" class="text-sm font-bold min-h-[40px] px-2" style="color:var(--accent-dark)">✕ Close</button>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <select id="kb-category" class="p-3 rounded-xl border bg-white font-bold text-sm" style="border-color:var(--border)">
@@ -282,6 +293,7 @@
                         <p id="quiz-passcode-value" class="text-4xl font-bold font-data tracking-widest" style="color:var(--accent-dark)"></p>
                         <p id="quiz-passcode-meta" class="text-[11px]" style="color:var(--text-muted)"></p>
                         <p id="quiz-passcode-timer" class="text-xs font-bold font-data mt-1"></p>
+                        <button onclick="endActiveQuizEarly()" class="mt-3 text-xs font-bold px-4 rounded-lg min-h-[40px]" style="background:var(--danger-soft);color:var(--danger-dark)">End This Code Now</button>
                     </div>
                 </div>
 
@@ -447,6 +459,7 @@
         window.onload = fetchData;
 
         async function fetchData() {
+            document.getElementById('sync-error').classList.add('hidden');
             setLoader(true, "Synchronizing...");
             try {
                 const res = await fetch(GAS_URL);
@@ -471,7 +484,11 @@
                 initDropdowns();
                 populateGlobalData();
                 renderKBList();
-            } catch (e) { alert("Network sync failed."); }
+            } catch (e) {
+                setLoader(false);
+                document.getElementById('sync-error').classList.remove('hidden');
+                return;
+            }
             setLoader(false);
         }
 
@@ -523,17 +540,43 @@
             const perc = Math.round((score/currentQuizData.length)*100) + "%";
             document.getElementById('hub-final-perc').innerText = perc;
             document.getElementById('hub-final-score').innerText = `Marks: ${score} / ${currentQuizData.length}`;
+
+            const reviewWrap = document.getElementById('hub-review-wrap'), reviewList = document.getElementById('hub-review-list');
+            if(staffWrongs.length) {
+                reviewWrap.classList.remove('hidden');
+                reviewList.innerHTML = staffWrongs.map(w => `
+                    <div class="p-2 rounded border" style="border-color:var(--border)">
+                        <p class="font-bold text-[11px]">Q: ${w.qText}</p>
+                        <p class="text-[11px]" style="color:var(--danger-dark)">Your answer: ${w.userChoice}</p>
+                        <p class="text-[11px] font-bold" style="color:var(--success)">Correct: ${w.correctText}</p>
+                    </div>`).join('');
+            } else {
+                reviewWrap.classList.add('hidden');
+            }
+
             const note = document.getElementById('hub-sync-note'), btn = document.getElementById('hub-save-btn');
+            btn.disabled = false;
+            btn.style.opacity = '1';
             if (isAIQuiz) {
                 note.innerText = "Practice mode — shared with your outlet manager, not your official record.";
                 btn.innerText = "Submit & Exit";
-                btn.onclick = saveAIQuizResult;
+                btn.onclick = () => submitOnce(btn, "Submit & Exit", saveAIQuizResult);
             } else {
                 note.innerText = "Syncing with database...";
                 btn.innerText = "Archive & Exit";
-                btn.onclick = saveQuizResult;
+                btn.onclick = () => submitOnce(btn, "Archive & Exit", saveQuizResult);
             }
             showView('view-staff-score');
+        }
+
+        // Disables the button on first tap so a slow connection + an impatient
+        // double-tap can't file the same result twice.
+        function submitOnce(btn, label, fn) {
+            if (btn.disabled) return;
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.innerText = 'Submitting...';
+            fn();
         }
 
         async function saveQuizResult() {
@@ -658,6 +701,20 @@
             }
             tick();
             quizTimerInterval = setInterval(tick, 1000);
+        }
+
+        async function endActiveQuizEarly() {
+            if(!confirm("End this code now? Staff won't be able to join with it anymore, even though it hasn't expired yet.")) return;
+            setLoader(true, "Ending code...");
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'end_ai_quiz', outlet: currentOutletMgrOutlet })
+                });
+            } catch(e) { /* best-effort — clear the UI regardless below */ }
+            if(quizTimerInterval) clearInterval(quizTimerInterval);
+            document.getElementById('quiz-passcode-display').classList.add('hidden');
+            setLoader(false);
         }
 
         function populateOutletMgrDropdowns() {
@@ -840,7 +897,7 @@
                             <span class="text-[9px] font-bold ml-1" style="color:var(--text-muted)">${c.Topic}</span>
                             <p class="font-bold mt-1">${c.Title}</p>
                         </div>
-                        <button onclick="openReaderForContent('${c.ID}')" class="flex-shrink-0 text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
+                        <button onclick="openReaderForContent('${c.ID}')" class="flex-shrink-0 text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
                     </div>
                     <p class="text-sm mt-1 line-clamp-2" style="color:var(--text-muted)">${c.Body}</p>
                     ${c.Link ? `<a href="${c.Link}" target="_blank" class="text-xs font-bold underline mt-2 inline-block" style="color:var(--primary)">Open Resource ↗</a>` : ''}
@@ -855,8 +912,8 @@
                         <p class="font-bold mt-1 truncate">${d.Name}</p>
                     </div>
                     <div class="flex gap-2 flex-shrink-0">
-                        <button onclick="openReaderForDoc('${d.ID}')" class="text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
-                        <a href="${d.DownloadURL}" target="_blank" class="text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border)">Download</a>
+                        <button onclick="openReaderForDoc('${d.ID}')" class="text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
+                        <a href="${d.DownloadURL}" target="_blank" class="text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border)">Download</a>
                     </div>
                 </div>`;
         }
@@ -934,6 +991,63 @@
             return { n, o };
         }
 
+        // v1.12: one attempt per quiz per calendar day, to close the loophole
+        // of exiting early and retrying for a better outcome (paired with
+        // exitQuizWithAutosave() below, which records a penalized attempt
+        // the moment someone backs out mid-quiz, not just on full completion).
+        function isSameCalendarDay(d1, d2) {
+            return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+        }
+
+        function hasAttemptedToday(name, outlet, topic, resultsArr) {
+            const today = new Date();
+            const n = name.toUpperCase().trim(), o = outlet.toUpperCase().trim();
+            return resultsArr.some(r => {
+                if((r.Name||"").toString().trim().toUpperCase() !== n) return false;
+                if((r.Outlet||"").toString().trim().toUpperCase() !== o) return false;
+                if((r.Topic||"").toString().trim() !== topic) return false;
+                const rDate = new Date(r.Timestamp);
+                return !isNaN(rDate) && isSameCalendarDay(rDate, today);
+            });
+        }
+
+        function hasAttemptedAIToday(name, outlet, passcode) {
+            const today = new Date();
+            const n = name.toUpperCase().trim(), o = outlet.toUpperCase().trim();
+            return allAIResults.some(r => {
+                if((r.Name||"").toString().trim().toUpperCase() !== n) return false;
+                if((r.Outlet||"").toString().trim().toUpperCase() !== o) return false;
+                if((r.Passcode||"").toString().trim() !== passcode) return false;
+                const rDate = new Date(r.Timestamp);
+                return !isNaN(rDate) && isSameCalendarDay(rDate, today);
+            });
+        }
+
+        // Exiting mid-quiz after answering at least one question now counts as
+        // a completed attempt — every unanswered question is recorded as wrong,
+        // so backing out early can never help a score, only hurt or tie it.
+        function exitQuizWithAutosave() {
+            const answeredCount = score + staffWrongs.length;
+            if(answeredCount === 0) { location.reload(); return; }
+
+            const remaining = currentQuizData.length - answeredCount;
+            const label = isAIQuiz ? 'practice code' : 'quiz';
+            const proceed = confirm(`You've answered ${answeredCount} of ${currentQuizData.length} question(s). Exiting now will count as a completed attempt — the ${remaining} unanswered question(s) will be marked wrong, and you won't be able to retake this ${label} again today. Exit anyway?`);
+            if(!proceed) return;
+
+            for(let i = answeredCount; i < currentQuizData.length; i++) {
+                const q = currentQuizData[i];
+                const correctIdx = parseInt(q.correct);
+                staffWrongs.push({
+                    qText: currentLang === 'en' ? q.question_en : (q.question_ms || q.question_en),
+                    userChoice: '(no answer — exited early)',
+                    correctText: currentLang === 'en' ? q[`opt${correctIdx + 1}_en`] : (q[`opt${correctIdx + 1}_ms`] || q[`opt${correctIdx + 1}_en`])
+                });
+            }
+
+            if(isAIQuiz) saveAIQuizResult(); else saveQuizResult();
+        }
+
         function revealAIPasscodeEntry() {
             if(!validateStaffNameOutlet()) return;
             document.getElementById('ai-passcode-entry').classList.remove('hidden');
@@ -954,6 +1068,12 @@
                 });
                 const data = await res.json();
                 if(data.error || !data.questions || !data.questions.length) throw new Error(data.error || "empty");
+
+                if(hasAttemptedAIToday(entry.n, entry.o, data.passcode)) {
+                    setLoader(false);
+                    return alert("You've already completed this practice code today. Ask your outlet manager for a new one if you'd like more practice.");
+                }
+
                 currentQuizData = data.questions;
                 joinedPasscode = data.passcode;
                 quizIdx = 0; score = 0; staffWrongs = [];
@@ -1130,6 +1250,9 @@
         function startQuiz() {
             const entry = validateStaffEntry();
             if(!entry) return;
+            if(hasAttemptedToday(entry.n, entry.o, entry.t, allResults)) {
+                return alert(`You've already attempted "${entry.t}" today. Please try again tomorrow.`);
+            }
             const pool = shuffleArray(allQuestions.filter(q => q.topic == entry.t));
             if(!pool.length) return alert(`No standard questions available yet for "${entry.t}". Try AI Practice instead.`);
             const count = getQuizCount(entry.o, entry.t);
@@ -1149,7 +1272,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.9.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.11.csv`; l.click();
         }
     </script>
 </body>
