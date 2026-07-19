@@ -122,7 +122,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.11</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.12</span></p>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <div onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
@@ -218,8 +218,8 @@
                     <button onclick="document.getElementById('hub-review-list').classList.toggle('hidden')" class="w-full text-xs font-bold uppercase tracking-widest py-2" style="color:var(--danger)">Review your answers ↕</button>
                     <div id="hub-review-list" class="hidden space-y-2 max-h-64 overflow-y-auto"></div>
                 </div>
-                <p id="hub-sync-note" class="text-sm italic" style="color:var(--text-muted)">Syncing with database...</p>
-                <button id="hub-save-btn" onclick="saveQuizResult()" class="w-full btn-grad p-5 rounded-2xl font-bold text-lg uppercase tracking-widest">Archive & Exit</button>
+                <p id="hub-sync-note" class="text-sm italic" style="color:var(--text-muted)">Saving your result...</p>
+                <button id="hub-save-btn" onclick="saveQuizResult()" class="w-full btn-grad p-5 rounded-2xl font-bold text-lg uppercase tracking-widest">Save & Exit</button>
             </div>
         </div>
 
@@ -318,19 +318,15 @@
                     <div><p class="uppercase" style="color:var(--text-muted)">Outlet</p><p id="disp-mgr-outlet" style="color:var(--primary)"></p></div>
                 </div>
 
-                <div class="p-4 rounded-2xl space-y-2 border" style="background:var(--primary-soft);border-color:var(--primary)">
-                    <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--primary-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>Quiz Length (This Outlet)</p>
-                    <div class="flex gap-2">
-                        <select id="qset-topic" onchange="renderQuizSettingDisplay()" class="flex-1 p-3 rounded-lg border bg-white text-sm" style="border-color:var(--border)"></select>
-                        <input type="number" id="qset-count" min="1" max="50" placeholder="#" class="w-16 p-3 rounded-lg border text-center text-sm font-data" style="border-color:var(--border)">
-                        <button onclick="saveQuizSetting()" class="btn-grad px-4 rounded-lg font-bold text-sm">Save</button>
-                    </div>
-                    <p id="qset-current" class="text-[11px]" style="color:var(--text-muted)">Select a topic to view/set its quiz length.</p>
-                </div>
-
                 <div class="space-y-3">
                     <select id="rep-topic-filter" onchange="updateStaffByTopic()" class="w-full p-4 rounded-xl border bg-white font-bold" style="border-color:var(--border);color:var(--primary)"></select>
                     <select id="rep-staff" onchange="onStaffSelect()" class="w-full p-4 rounded-xl border font-bold" style="border-color:var(--border);color:var(--primary-dark)"></select>
+                </div>
+
+                <div id="existing-report-notice" class="hidden p-4 rounded-xl border text-sm" style="background:var(--accent-soft);border-color:var(--accent)">
+                    <p class="font-bold" style="color:var(--accent-dark)">A report already exists for this person and topic.</p>
+                    <p id="existing-report-meta" class="text-[11px] mt-1" style="color:var(--text-muted)"></p>
+                    <button onclick="editExistingReport()" class="mt-2 text-xs font-bold px-4 rounded-lg min-h-[40px]" style="background:var(--surface);color:var(--accent-dark);border:1px solid var(--accent)">Edit This Report</button>
                 </div>
                 
                 <div id="wrongs-container" class="p-4 rounded-xl hidden text-xs border shadow-inner" style="background:var(--danger-soft);color:var(--danger-dark);border-color:var(--danger)">
@@ -441,7 +437,7 @@
         let allQuestions = [], allResults = [], allReports = [], allWrongAnswers = [], allContent = [], allQuizSettings = [];
         let allOutletNotes = [], allAIResults = [], allAIWrongAnswers = [], allReferenceDocs = [];
         let currentLang = 'en', quizIdx = 0, score = 0, currentQuizData = [], staffWrongs = [];
-        let isQuizRunning = false, isAIQuiz = false, currentOutletMgrOutlet = '', joinedPasscode = '';
+        let isQuizRunning = false, isAIQuiz = false, currentOutletMgrOutlet = '', joinedPasscode = '', isEditingReport = false;
 
         const outletList = ["AJ", "B6", "BB", "BJR", "BP", "CDR", "CK", "DG", "DGD", "GB", "GBD", "GM", "HL", "HQ", "HQCT", "JL", "JLD", "JTH", "KB", "KBKK", "KBKS", "KBTJ", "KKR", "KL", "KMD", "KMN", "KMSK", "KS", "MC", "MCD", "MLR", "MR", "PC", "PDM", "PK", "PM", "PP", "PPK", "PSPD", "PT", "RJ", "SLS", "SMR", "ST", "TM", "TMD", "TMT", "TPOH", "TPT", "WM"];
         const managerData = [
@@ -460,7 +456,7 @@
 
         async function fetchData() {
             document.getElementById('sync-error').classList.add('hidden');
-            setLoader(true, "Synchronizing...");
+            setLoader(true, "Loading...");
             try {
                 const res = await fetch(GAS_URL);
                 const dataRaw = await res.json();
@@ -562,9 +558,9 @@
                 btn.innerText = "Submit & Exit";
                 btn.onclick = () => submitOnce(btn, "Submit & Exit", saveAIQuizResult);
             } else {
-                note.innerText = "Syncing with database...";
-                btn.innerText = "Archive & Exit";
-                btn.onclick = () => submitOnce(btn, "Archive & Exit", saveQuizResult);
+                note.innerText = "Saving your result...";
+                btn.innerText = "Save & Exit";
+                btn.onclick = () => submitOnce(btn, "Save & Exit", saveQuizResult);
             }
             showView('view-staff-score');
         }
@@ -584,7 +580,7 @@
             const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
             if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
             else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
-            alert("Knowledge Record Securely Archived.");
+            alert("Your result has been saved.");
             location.reload(); 
         }
 
@@ -601,49 +597,60 @@
 
         /** MANAGER LOGIC (Area Manager) **/
         async function submitManagerReport() {
-            if(!document.getElementById('rep-date').value) return alert("Select assessment date.");
-            const p = { action: 'save_report', manager: document.getElementById('disp-mgr-name').innerText, outlet: document.getElementById('disp-mgr-outlet').innerText, staffName: document.getElementById('rep-staff').value, staffScore: document.getElementById('disp-staff-perc').innerText, trainTitle: document.getElementById('rep-topic-filter').value, trainingDate: document.getElementById('rep-date').value, level: document.getElementById('disp-staff-level').innerText, comments: document.getElementById('mgr-comment').value, focus: document.getElementById('mgr-housebrand').value, gaps: document.getElementById('mgr-gaps').value, rec: document.getElementById('mgr-recom').value };
-            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
-            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
-            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
-            alert("Report Captured.");
-            document.getElementById('rep-staff').value = "";
-            document.getElementById('mgr-comment').value = "";
-            document.getElementById('mgr-housebrand').value = "";
-            document.getElementById('mgr-gaps').value = "";
-            document.getElementById('mgr-recom').value = "";
+            if(!document.getElementById('rep-date').value) return alert("Please select an assessment date first.");
+            const p = {
+                action: 'save_report',
+                manager: document.getElementById('disp-mgr-name').innerText,
+                outlet: document.getElementById('disp-mgr-outlet').innerText,
+                staffName: document.getElementById('rep-staff').value,
+                staffScore: document.getElementById('disp-staff-perc').innerText,
+                trainTitle: document.getElementById('rep-topic-filter').value,
+                trainingDate: document.getElementById('rep-date').value,
+                level: document.getElementById('disp-staff-level').innerText,
+                comments: document.getElementById('mgr-comment').value,
+                focus: document.getElementById('mgr-housebrand').value,
+                gaps: document.getElementById('mgr-gaps').value,
+                rec: document.getElementById('mgr-recom').value,
+                isEdit: isEditingReport
+            };
+
+            setLoader(true, "Submitting report...");
+            try {
+                const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p) });
+                const data = await res.json();
+                setLoader(false);
+
+                if(data.status === 'duplicate') {
+                    const who = data.existing ? data.existing.manager : 'another manager';
+                    const when = data.existing && data.existing.timestamp ? new Date(data.existing.timestamp).toLocaleDateString() : '';
+                    return alert(`A report already exists for this person and topic — filed by ${who}${when ? ' on ' + when : ''}. Use "Edit This Report" above if you need to change it.`);
+                }
+                if(data.status === 'auth_error') {
+                    return alert("This report was filed by a different manager, so it can't be edited from here.");
+                }
+                if(data.status === 'error') {
+                    return alert("Couldn't save the report — please try again.");
+                }
+
+                alert(data.status === 'updated' ? "Report updated." : "Report submitted.");
+                isEditingReport = false;
+                document.getElementById('existing-report-notice').classList.add('hidden');
+                document.getElementById('rep-staff').value = "";
+                document.getElementById('mgr-comment').value = "";
+                document.getElementById('mgr-housebrand').value = "";
+                document.getElementById('mgr-gaps').value = "";
+                document.getElementById('mgr-recom').value = "";
+            } catch(e) {
+                setLoader(false);
+                alert("Couldn't reach the server — check your connection and try again.");
+            }
         }
 
-        /** QUIZ LENGTH SETTINGS (per outlet + topic, set by Area Manager) **/
+        // v1.13: quiz length is no longer configurable per outlet/topic — it
+        // wasn't earning its keep as a separate Area Manager control. Standard
+        // Quiz just uses a sensible fixed default now.
         function getQuizCount(outlet, topic) {
-            const s = allQuizSettings.find(q => (q.Outlet||"").toString().trim().toUpperCase() === (outlet||"").toUpperCase() && (q.Topic||"").toString().trim() === topic);
-            const n = s ? parseInt(s.Count) : NaN;
-            return (!isNaN(n) && n > 0) ? n : 10;
-        }
-
-        function renderQuizSettingDisplay() {
-            const topic = document.getElementById('qset-topic').value;
-            const outlet = document.getElementById('disp-mgr-outlet').innerText.trim();
-            if(!topic) { document.getElementById('qset-current').innerText = "Select a topic to view/set its quiz length."; return; }
-            const s = allQuizSettings.find(q => (q.Outlet||"").toString().trim().toUpperCase() === outlet.toUpperCase() && (q.Topic||"").toString().trim() === topic);
-            document.getElementById('qset-current').innerText = s ? `Current: ${s.Count} questions for "${topic}" @ ${outlet}` : `No custom length set for "${topic}" @ ${outlet} (default: 10)`;
-        }
-
-        function saveQuizSetting() {
-            const outlet = document.getElementById('disp-mgr-outlet').innerText.trim();
-            const topic = document.getElementById('qset-topic').value;
-            const count = parseInt(document.getElementById('qset-count').value);
-            if(!topic) return alert("Pick a topic first.");
-            if(!count || count < 1) return alert("Enter a valid number of questions.");
-            const manager = document.getElementById('disp-mgr-name').innerText;
-            const p = { action: 'save_quiz_setting', outlet, topic, count, manager };
-            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
-            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
-            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
-            const idx = allQuizSettings.findIndex(q => (q.Outlet||"").toString().trim().toUpperCase() === outlet.toUpperCase() && (q.Topic||"").toString().trim() === topic);
-            if(idx > -1) allQuizSettings[idx].Count = count; else allQuizSettings.push({ Outlet: outlet, Topic: topic, Count: count });
-            renderQuizSettingDisplay();
-            alert(`Quiz length for "${topic}" @ ${outlet} set to ${count} questions.`);
+            return 10;
         }
 
         /** OUTLET MANAGER: LOGIN, NOTES, AI MONITOR **/
@@ -652,8 +659,8 @@
         function loginOutletManager() {
             const outlet = document.getElementById('outlet-mgr-outlet').value;
             const pin = document.getElementById('outlet-mgr-pass').value;
-            if(!outlet) return alert("Select your outlet.");
-            if(pin !== "1234") return alert("Invalid PIN.");
+            if(!outlet) return alert("Please select your outlet.");
+            if(pin !== "1234") return alert("That PIN doesn't look right.");
             currentOutletMgrOutlet = outlet;
             document.getElementById('disp-outlet-mgr-code').innerText = outlet;
             populateOutletMgrDropdowns();
@@ -748,7 +755,7 @@
 
         async function createAIQuiz() {
             const raw = document.getElementById('quiz-source-select').value;
-            if(!raw) return alert("Pick a resource first.");
+            if(!raw) return alert("Please choose a resource first.");
             const [sourceType, ...rest] = raw.split(':');
             const sourceValue = rest.join(':');
             const topicLabel = document.getElementById('quiz-source-select').selectedOptions[0].innerText;
@@ -767,7 +774,7 @@
                 if(!data.passcode) throw new Error("Server didn't return a passcode.");
                 showPasscodeDisplay(data.passcode, data.topic, data.count, data.createdAt);
             } catch(e) {
-                alert("Quiz generation failed: " + e.message);
+                alert("Couldn't generate the quiz: " + e.message);
             }
             setLoader(false);
         }
@@ -817,7 +824,7 @@
             const title = document.getElementById('kb-title').value.trim();
             const body = document.getElementById('kb-body').value.trim();
             const link = document.getElementById('kb-link').value.trim();
-            if(!topic || !title || !body) return alert("Topic, Title and Content are required.");
+            if(!topic || !title || !body) return alert("Please fill in the topic, title, and content.");
             const p = { action: 'save_content', topic, category, title, body, link };
             const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
             if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
@@ -829,7 +836,7 @@
             document.getElementById('kb-topic').value = '';
             renderKBList();
             populateGlobalData();
-            alert("Added to knowledge base.");
+            alert("Added to the knowledge base.");
         }
 
         function renderKBList() {
@@ -981,7 +988,7 @@
 
         function validateStaffEntry() {
             const n = document.getElementById('staff-name').value, t = document.getElementById('staff-topic').value, o = document.getElementById('staff-outlet').value;
-            if(!n || !t || !o) { alert("All fields required"); return null; }
+            if(!n || !t || !o) { alert("Please fill in all fields."); return null; }
             return { n, t, o };
         }
 
@@ -1121,6 +1128,28 @@
         }
 
         /** LOGIC HANDLERS **/
+        function findExistingReport(staffName, outlet, topic) {
+            return allReports.find(rep =>
+                (rep["Staff Name"] || "").toString().trim().toUpperCase() === staffName.trim().toUpperCase() &&
+                (rep["Outlet"] || "").toString().trim().toUpperCase() === outlet.trim().toUpperCase() &&
+                (rep["Training Title"] || rep["Topic"] || "").toString().trim() === topic
+            );
+        }
+
+        function editExistingReport() {
+            const n = document.getElementById('rep-staff').value, o = document.getElementById('disp-mgr-outlet').innerText.trim().toUpperCase(), topic = document.getElementById('rep-topic-filter').value;
+            const existing = findExistingReport(n, o, topic);
+            if(!existing) return;
+            isEditingReport = true;
+            const d = new Date(existing.Timestamp);
+            if(!isNaN(d)) document.getElementById('rep-date').value = d.toISOString().slice(0, 10);
+            document.getElementById('mgr-comment').value = existing["Competency Comments"] || '';
+            document.getElementById('mgr-housebrand').value = existing["Housebrand Focus"] || '';
+            document.getElementById('mgr-gaps').value = existing["Performance Gaps"] || '';
+            document.getElementById('mgr-recom').value = existing["Recommendations"] || '';
+            alert("Existing report loaded — make your changes, then submit to update it.");
+        }
+
         function onStaffSelect() {
             const n = document.getElementById('rep-staff').value, o = document.getElementById('disp-mgr-outlet').innerText.trim().toUpperCase(), topic = document.getElementById('rep-topic-filter').value;
             const r = allResults.find(x => (x.Name || "").trim().toUpperCase() === n.trim().toUpperCase() && (x.Outlet || "").trim().toUpperCase() === o && (x.Topic || "").trim() === topic);
@@ -1142,6 +1171,25 @@
                     list.innerHTML = gaps.map(w => `<div class="bg-white p-2 rounded border mb-1"><p class="font-bold text-[11px]" style="color:var(--danger-dark)">Q: ${w["Question Text"]}</p><p class="font-black text-[11px] mt-1" style="color:var(--success)">✓ Correct: ${w["Correct Answer"]}</p></div>`).join('');
                 } else cont.classList.add('hidden');
             }
+
+            // Fresh state for every new staff/topic selection — no leftover text
+            // from a previous person accidentally riding along into a new report.
+            isEditingReport = false;
+            document.getElementById('mgr-comment').value = '';
+            document.getElementById('mgr-housebrand').value = '';
+            document.getElementById('mgr-gaps').value = '';
+            document.getElementById('mgr-recom').value = '';
+            document.getElementById('rep-date').value = '';
+
+            const notice = document.getElementById('existing-report-notice');
+            const existing = findExistingReport(n, o, topic);
+            if(existing) {
+                notice.classList.remove('hidden');
+                const d = new Date(existing.Timestamp);
+                document.getElementById('existing-report-meta').innerText = `Filed by ${existing.Manager}${!isNaN(d) ? ' on ' + d.toLocaleDateString() : ''}.`;
+            } else {
+                notice.classList.add('hidden');
+            }
         }
 
         function populateGlobalData() {
@@ -1155,7 +1203,6 @@
             document.getElementById('sup-filter-topic').innerHTML = '<option value="ALL">All topics</option>' + dbTopics.map(t => `<option value="${t}">${t}</option>`).join('');
 
             document.getElementById('kb-topic-list').innerHTML = allTopics.map(t => `<option value="${t}">`).join('');
-            document.getElementById('qset-topic').innerHTML = '<option value="">Select topic...</option>' + allTopics.map(t => `<option value="${t}">${t}</option>`).join('');
             document.getElementById('res-topic-filter').innerHTML = '<option value="ALL">All topics</option>' + allTopics.map(t => `<option value="${t}">${t}</option>`).join('');
         }
 
@@ -1173,19 +1220,19 @@
         }
 
         /** CORE UTILS **/
-        function loginSupervisor() { if(document.getElementById('sup-pass').value === "SV2026") { showView('view-supervisor-dash'); setTimeout(renderSupervisorStats, 200); } else alert("Access Denied."); }
+        function loginSupervisor() { if(document.getElementById('sup-pass').value === "SV2026") { showView('view-supervisor-dash'); setTimeout(renderSupervisorStats, 200); } else alert("That password doesn't look right."); }
         function loginManager() {
             const id = document.getElementById('mgr-select').value, o = document.getElementById('mgr-outlet').value, pin = document.getElementById('mgr-pass').value;
-            if(!id || !o) return alert("Select Creds.");
+            if(!id || !o) return alert("Please select your name and outlet.");
             if(pin === "1234") {
                 const m = managerData.find(x => x.id === id);
                 if (m && m.outlets.includes(o)) {
                     document.getElementById('disp-mgr-name').innerText = id;
                     document.getElementById('disp-mgr-outlet').innerText = o;
                     showView('view-manager-form');
-                    renderQuizSettingDisplay();
-                } else alert("Outlet Mismatch.");
-            } else alert("Invalid PIN.");
+                    document.getElementById('existing-report-notice').classList.add('hidden');
+                } else alert("That outlet isn't assigned to you.");
+            } else alert("That PIN doesn't look right.");
         }
         function initDropdowns() {
             const opts = outletList.map(o => `<option value="${o}">${o}</option>`).join('');
@@ -1265,14 +1312,14 @@
             renderQuestion(); showView('view-quiz');
         }
         function exportComprehensiveCSV() {
-            if (allResults.length === 0) return alert("No data");
+            if (allResults.length === 0) return alert("There's no data to export yet.");
             const wrap = (t) => `"${(t || "").toString().replace(/"/g, "'").trim()}"`;
             let csv = "Date,Personnel,Auditor,Module,Score,Comments,Housebrand,Gaps,Recs,Outlet\n";
             allReports.forEach(r => {
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.11.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.12.csv`; l.click();
         }
     </script>
 </body>
