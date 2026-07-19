@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PharmAcademy | Training Management</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#F1502A">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PharmAcademy">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('SW Registered'))
+        .catch(err => console.log('SW Registration Failed', err));
+    });
+  }
+</script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+        :root {
+            --bg: #FFF9F5;
+            --surface: #FFFFFF;
+            --primary: #F1502A;
+            --primary-dark: #C23A1B;
+            --primary-soft: #FFE6DC;
+            --accent: #F2A93C;
+            --accent-dark: #C97F14;
+            --accent-soft: #FFF3DC;
+            --success: #16A34A;
+            --success-dark: #14532D;
+            --success-soft: #DCFCE7;
+            --danger: #D33A63;
+            --danger-dark: #7A1233;
+            --danger-soft: #FCE3EA;
+            --text: #2B1D16;
+            --text-muted: #8A7367;
+            --border: #F1E2D8;
+            --supervisor: #7C3F98;
+            --supervisor-soft: #F1E7F5;
+            --resources: #2563EB;
+            --resources-soft: #E1EAFC;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); -webkit-tap-highlight-color: transparent; padding-bottom: env(safe-area-inset-bottom); }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        .font-data { font-family: 'IBM Plex Mono', monospace; }
+
+        .glass { background: var(--surface); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 4px 16px rgba(15,23,42,0.05); }
+        .btn-grad { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; transition: 0.2s; }
+        .btn-grad:active { transform: scale(0.96); }
+        .btn-ai { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); color: white; transition: 0.2s; }
+        .btn-ai:active { transform: scale(0.96); }
+        .btn-outline { background: var(--surface); border: 2px solid var(--border); color: var(--text); transition: 0.2s; }
+        .btn-outline:active { transform: scale(0.96); }
+
+        .loader-overlay { 
+            position: fixed; inset: 0; background: rgba(255, 249, 245, 0.97); 
+            z-index: 9999; display: flex; justify-content: center; 
+            align-items: center; flex-direction: column; 
+        }
+        .loader-overlay.hidden { display: none !important; pointer-events: none !important; visibility: hidden !important; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .opt-btn { transition: all 0.15s; border: 2px solid var(--border); text-align: left; padding: 1.1rem 1.25rem; border-radius: 1rem; background: var(--surface); font-weight: 500; width: 100%; margin-bottom: 0.65rem; cursor: pointer; min-height: 48px; }
+        .opt-btn:active { border-color: var(--primary); }
+        .opt-correct { background-color: var(--success-soft) !important; border-color: var(--success) !important; color: var(--success-dark) !important; }
+        .opt-wrong { background-color: var(--danger-soft) !important; border-color: var(--danger) !important; color: var(--danger-dark) !important; }
+        .hidden { display: none !important; }
+        input, select, textarea { font-size: 16px !important; }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        button, .nav-btn, .cursor-pointer { position: relative; z-index: 50; cursor: pointer; }
+        button, select, .role-tile { min-height: 44px; }
+
+        .progress-track { width: 100%; height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; margin-bottom: 1.25rem; }
+        .progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%); transition: width .25s ease; }
+
+        .quiz-action-bar { position: sticky; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.97); backdrop-filter: blur(6px); border-top: 1px solid var(--border); padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom)); margin: 1.5rem -1.5rem -1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem; border-radius: 0 0 1.5rem 1.5rem; }
+
+        .badge { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 999px; }
+
+        .hero-texture { background-image: radial-gradient(var(--primary-soft) 1.6px, transparent 1.6px); background-size: 16px 16px; }
+        .icon-badge { width: 3.25rem; height: 3.25rem; border-radius: 1.1rem; display: flex; align-items: center; justify-content: center; }
+        @media (min-width: 768px) { .icon-badge { width: 4rem; height: 4rem; } }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="loader" class="loader-overlay hidden">
+        <div class="spinner"></div>
+        <p id="loader-text" class="mt-4 font-bold font-display animate-pulse" style="color:var(--primary)">Loading...</p>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <div id="view-main" class="animate__animated animate__fadeIn">
+            <header class="text-center mb-8 hero-texture rounded-3xl py-6">
+                <div class="inline-flex items-center gap-3 mb-1">
+                    <svg viewBox="0 0 120 120" class="w-10 h-10 md:w-12 md:h-12 flex-shrink-0">
+                        <defs><linearGradient id="hdrGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F1502A"/><stop offset="100%" stop-color="#A62E14"/></linearGradient></defs>
+                        <rect x="0" y="0" width="120" height="120" rx="26" fill="url(#hdrGrad)"/>
+                        <circle cx="87" cy="21" r="8" fill="#F5B93F"/>
+                        <rect x="26" y="60" width="14" height="26" rx="4" fill="#FFFFFF"/>
+                        <rect x="53" y="46" width="14" height="40" rx="4" fill="#FFFFFF"/>
+                        <rect x="80" y="32" width="14" height="54" rx="4" fill="#FFFFFF"/>
+                    </svg>
+                    <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
+                </div>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.3</span></p>
+            </header>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+                <div onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
+                    <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div></div>
+                    <h2 class="text-base md:text-xl font-bold font-display">Staff</h2>
+                </div>
+                <div onclick="showManagerRoleSelect()" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--accent)">
+                    <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--accent-soft);color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg></div></div>
+                    <h2 class="text-base md:text-xl font-bold font-display">Manager</h2>
+                </div>
+                <div onclick="showView('view-supervisor-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--supervisor)">
+                    <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--supervisor-soft);color:var(--supervisor)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4.5"/></svg></div></div>
+                    <h2 class="text-base md:text-xl font-bold font-display">Supervisor</h2>
+                </div>
+                <div onclick="openResources()" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--resources)">
+                    <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--resources-soft);color:var(--resources)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg></div></div>
+                    <h2 class="text-base md:text-xl font-bold font-display">Resources</h2>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-manager-role-select" class="hidden">
+            <div class="glass p-8 rounded-3xl space-y-4 max-w-md mx-auto text-center">
+                <button onclick="goHome()" class="nav-btn font-bold mb-2" style="color:var(--primary)">← Back</button>
+                <h2 class="text-2xl font-bold font-display">Which manager are you?</h2>
+                <p class="text-sm" style="color:var(--text-muted)">Outlet Managers see one store. Area Managers oversee several.</p>
+                <div class="space-y-3 pt-2">
+                    <button onclick="showView('view-outlet-mgr-login')" class="w-full btn-grad p-5 rounded-2xl font-bold text-left flex items-center gap-4">
+                        <svg viewBox="0 0 24 24" class="w-8 h-8 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l1-5h14l1 5"/><path d="M4 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M5 9v10h14V9"/><path d="M10 19v-5h4v5"/></svg>
+                        <span><span class="block font-display text-lg">Outlet Manager</span><span class="block text-xs opacity-90 font-normal">One outlet · monitors AI practice</span></span>
+                    </button>
+                    <button onclick="showView('view-manager-login')" class="w-full btn-ai p-5 rounded-2xl font-bold text-left flex items-center gap-4">
+                        <svg viewBox="0 0 24 24" class="w-8 h-8 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+                        <span><span class="block font-display text-lg">Area Manager</span><span class="block text-xs opacity-90 font-normal">Multiple outlets · assessment reports</span></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-staff-login" class="hidden">
+            <div class="glass p-6 md:p-8 rounded-3xl space-y-4">
+                <button onclick="goHome()" class="nav-btn font-bold mb-2" style="color:var(--primary)">← Back</button>
+                <h2 class="text-2xl font-bold font-display">Staff Entry</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="setLang('en')" id="lang-en" class="p-3 rounded-xl border-2 font-bold" style="border-color:var(--primary);background:var(--primary);color:white;">English</button>
+                    <button onclick="setLang('ms')" id="lang-ms" class="p-3 rounded-xl border-2 font-bold" style="border-color:var(--border);">Malay</button>
+                </div>
+                <input type="text" id="staff-name" placeholder="Full Name" class="w-full p-4 rounded-xl border uppercase" style="border-color:var(--border)">
+                <select id="staff-outlet" class="w-full p-4 rounded-xl border bg-white" style="border-color:var(--border)"></select>
+                <select id="staff-topic" onchange="refreshQuizModeInfo()" class="w-full p-4 rounded-xl border bg-white font-bold" style="border-color:var(--border);color:var(--primary)"></select>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="startQuiz()" class="btn-grad p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12l2 2 4-4.5"/></svg>Standard Quiz</button>
+                    <button onclick="generateAIQuiz()" class="btn-ai p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/><path d="M7.5 15h9"/></svg>AI Practice</button>
+                </div>
+                <p id="quiz-mode-info" class="text-[11px] text-center leading-snug" style="color:var(--text-muted)">Standard uses the official question bank · AI Practice generates fresh questions and is shared with your outlet manager, not your official record.</p>
+            </div>
+        </div>
+
+        <div id="view-quiz" class="hidden">
+            <div class="glass p-6 rounded-3xl">
+                <div class="flex justify-between items-center mb-3">
+                    <button id="quiz-back-btn" onclick="location.reload()" class="nav-btn font-bold" style="color:var(--text-muted)">← Exit</button>
+                    <div id="quiz-progress" class="font-bold font-data px-3 py-1 rounded-full text-sm" style="color:var(--primary);background:var(--primary-soft)">Q 1</div>
+                </div>
+                <div id="quiz-mode-badge" class="hidden badge mb-2 inline-flex items-center gap-1" style="color:var(--accent-dark);background:var(--accent-soft)"><svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/></svg>AI PRACTICE — shared with your outlet manager</div>
+                <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+                <div id="q-container" class="min-h-[220px]">
+                    <h3 id="q-text" class="text-xl font-bold mb-6 leading-tight font-display"></h3>
+                    <div id="options-grid"></div>
+                </div>
+                <div class="quiz-action-bar">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden text-white px-8 py-3 rounded-xl font-bold" style="background:var(--text)">Next →</button>
+                    <button id="submit-quiz-btn" onclick="revealStaffScore()" class="hidden text-white px-10 py-3 rounded-xl font-bold uppercase text-sm" style="background:var(--success)">Submit Intel</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-staff-score" class="hidden">
+            <div class="glass p-8 md:p-10 rounded-3xl text-center space-y-6 animate__animated animate__zoomIn max-w-md mx-auto">
+                <div class="flex justify-center" style="color:var(--success)"><svg viewBox="0 0 24 24" class="w-16 h-16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 5-5.5"/></svg></div>
+                <h2 class="text-2xl font-bold font-display">Assessment Complete</h2>
+                <div class="py-6 border-y" style="border-color:var(--border)">
+                    <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:var(--text-muted)">Knowledge Accuracy</p>
+                    <div id="hub-final-perc" class="text-6xl md:text-7xl font-bold font-data" style="color:var(--primary)">0%</div>
+                    <p id="hub-final-score" class="text-lg font-bold mt-2" style="color:var(--text-muted)">Score: 0/0</p>
+                </div>
+                <p id="hub-sync-note" class="text-sm italic" style="color:var(--text-muted)">Syncing with database...</p>
+                <button id="hub-save-btn" onclick="saveQuizResult()" class="w-full btn-grad p-5 rounded-2xl font-bold text-lg uppercase tracking-widest">Archive & Exit</button>
+            </div>
+        </div>
+
+        <div id="view-resources" class="hidden">
+            <div class="glass p-6 rounded-3xl">
+                <div class="flex justify-between items-center mb-4 gap-2">
+                    <button onclick="goHome()" class="nav-btn font-bold flex-shrink-0" style="color:var(--primary)">← Back</button>
+                    <h2 class="text-lg md:text-xl font-bold font-display text-center flex-1 flex items-center justify-center gap-2" style="color:var(--resources)"><svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg>Training Resources</h2>
+                    <button id="res-manage-btn" onclick="unlockResourceManager()" class="nav-btn font-bold text-xs px-3 py-2 rounded-xl flex-shrink-0 flex items-center gap-1.5" style="background:var(--accent-soft);color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>Manage</button>
+                </div>
+                <select id="res-topic-filter" onchange="renderResourceList()" class="w-full p-3 rounded-xl border mb-4 bg-white font-bold text-sm" style="border-color:var(--border)"></select>
+
+                <div id="resource-manager-panel" class="hidden mb-6 p-4 rounded-2xl border space-y-3" style="background:var(--accent-soft);border-color:var(--accent)">
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.2L15.8 5a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.2 19 4 20z"/><path d="M14 6.5l3.5 3.5"/></svg>Add / Manage Resources</p>
+                        <button onclick="document.getElementById('resource-manager-panel').classList.add('hidden')" class="text-sm font-bold" style="color:var(--accent-dark)">✕ Close</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="kb-category" class="p-3 rounded-xl border bg-white font-bold text-sm" style="border-color:var(--border)">
+                            <option>SOP</option>
+                            <option>Training Material</option>
+                            <option>Guideline</option>
+                            <option>Note</option>
+                        </select>
+                        <input list="kb-topic-list" id="kb-topic" placeholder="Topic (existing or new)" class="p-3 rounded-xl border text-sm" style="border-color:var(--border)">
+                        <datalist id="kb-topic-list"></datalist>
+                    </div>
+                    <input type="text" id="kb-title" placeholder="Title" class="w-full p-3 rounded-xl border text-sm" style="border-color:var(--border)">
+                    <textarea id="kb-body" placeholder="Content / instructions for staff" class="w-full p-3 rounded-xl border h-24 text-sm" style="border-color:var(--border)"></textarea>
+                    <input type="url" id="kb-link" placeholder="Optional link (PDF, Drive, etc.)" class="w-full p-3 rounded-xl border text-sm" style="border-color:var(--border)">
+                    <button onclick="addKnowledgeItem()" class="w-full btn-ai p-3 rounded-xl font-bold text-sm">Add to Library</button>
+                    <div class="pt-2 border-t space-y-2 max-h-72 overflow-y-auto" id="kb-list" style="border-color:var(--accent)"></div>
+                </div>
+
+                <div id="res-list"></div>
+            </div>
+        </div>
+
+        <div id="view-outlet-mgr-login" class="hidden">
+            <div class="glass p-8 rounded-3xl max-w-md mx-auto space-y-4 text-center">
+                <button onclick="showManagerRoleSelect()" class="nav-btn font-bold mb-2" style="color:var(--primary)">← Back</button>
+                <h2 class="text-2xl font-bold font-display flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l1-5h14l1 5"/><path d="M4 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M5 9v10h14V9"/><path d="M10 19v-5h4v5"/></svg>Outlet Manager</h2>
+                <select id="outlet-mgr-outlet" class="w-full p-4 rounded-xl border font-bold bg-white" style="border-color:var(--border)"></select>
+                <input type="password" id="outlet-mgr-pass" placeholder="PIN" class="w-full p-4 rounded-xl border text-center font-data" style="border-color:var(--border)">
+                <button onclick="loginOutletManager()" class="w-full btn-grad p-4 rounded-xl font-bold">ENTER DASHBOARD</button>
+            </div>
+        </div>
+
+        <div id="view-outlet-mgr-dash" class="hidden">
+            <div class="glass p-6 rounded-3xl space-y-6">
+                <div class="flex justify-between items-center border-b pb-4" style="border-color:var(--border)">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase" style="color:var(--text-muted)">Outlet Manager</p>
+                        <p id="disp-outlet-mgr-code" class="text-xl font-bold font-data" style="color:var(--primary)"></p>
+                    </div>
+                    <button onclick="location.reload()" class="nav-btn font-bold text-sm" style="color:var(--danger)">Logout</button>
+                </div>
+
+                <div class="p-4 rounded-2xl space-y-2 border" style="background:var(--accent-soft);border-color:var(--accent)">
+                    <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/></svg>AI Practice Notes</p>
+                    <p class="text-[11px]" style="color:var(--text-muted)">Add context so AI-generated practice questions reflect what your outlet needs to focus on.</p>
+                    <select id="note-topic" onchange="renderOutletNoteDisplay()" class="w-full p-3 rounded-lg border bg-white text-sm" style="border-color:var(--border)"></select>
+                    <textarea id="note-body" placeholder="e.g. Focus on cold-chain storage — we had 2 near-misses this month." class="w-full p-3 rounded-lg border h-20 text-sm" style="border-color:var(--border)"></textarea>
+                    <button onclick="saveOutletNote()" class="w-full btn-ai p-3 rounded-lg font-bold text-sm">Save Notes</button>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--primary)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>AI Practice Monitor</p>
+                        <select id="ai-monitor-topic-filter" onchange="renderAIResultsForOutlet()" class="p-2 text-[10px] border rounded-lg bg-white font-bold" style="border-color:var(--border)"></select>
+                    </div>
+                    <div id="ai-monitor-list" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-manager-form" class="hidden">
+            <div class="glass p-6 rounded-3xl space-y-6">
+                <div class="flex justify-between items-center border-b pb-4" style="border-color:var(--border)">
+                    <h2 class="text-xl font-bold font-display leading-tight" style="color:var(--primary)">Assessment Form</h2>
+                    <button onclick="location.reload()" class="nav-btn font-bold text-sm" style="color:var(--danger)">Logout</button>
+                </div>
+                <div class="p-4 rounded-2xl grid grid-cols-2 text-xs font-bold" style="background:var(--primary-soft)">
+                    <div><p class="uppercase" style="color:var(--text-muted)">Auditor</p><p id="disp-mgr-name" style="color:var(--primary)"></p></div>
+                    <div><p class="uppercase" style="color:var(--text-muted)">Outlet</p><p id="disp-mgr-outlet" style="color:var(--primary)"></p></div>
+                </div>
+
+                <div class="p-4 rounded-2xl space-y-2 border" style="background:var(--primary-soft);border-color:var(--primary)">
+                    <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--primary-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>Quiz Length (This Outlet)</p>
+                    <div class="flex gap-2">
+                        <select id="qset-topic" onchange="renderQuizSettingDisplay()" class="flex-1 p-3 rounded-lg border bg-white text-sm" style="border-color:var(--border)"></select>
+                        <input type="number" id="qset-count" min="1" max="50" placeholder="#" class="w-16 p-3 rounded-lg border text-center text-sm font-data" style="border-color:var(--border)">
+                        <button onclick="saveQuizSetting()" class="btn-grad px-4 rounded-lg font-bold text-sm">Save</button>
+                    </div>
+                    <p id="qset-current" class="text-[11px]" style="color:var(--text-muted)">Select a topic to view/set its quiz length.</p>
+                </div>
+
+                <div class="space-y-3">
+                    <select id="rep-topic-filter" onchange="updateStaffByTopic()" class="w-full p-4 rounded-xl border bg-white font-bold" style="border-color:var(--border);color:var(--primary)"></select>
+                    <select id="rep-staff" onchange="onStaffSelect()" class="w-full p-4 rounded-xl border font-bold" style="border-color:var(--border);color:var(--primary-dark)"></select>
+                </div>
+                
+                <div id="wrongs-container" class="p-4 rounded-xl hidden text-xs border shadow-inner" style="background:var(--danger-soft);color:var(--danger-dark);border-color:var(--danger)">
+                    <p class="font-black mb-2 uppercase tracking-widest flex items-center gap-1.5"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h13l-3 4 3 4H5"/></svg>Coaching Points (Missed Qs)</p>
+                    <div id="wrongs-list" class="space-y-2"></div>
+                </div>
+
+                <input type="date" id="rep-date" class="w-full p-4 rounded-xl border" style="border-color:var(--border)">
+                
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div class="p-3 border rounded-xl" style="border-color:var(--border)"><p class="text-[10px] uppercase" style="color:var(--text-muted)">Score</p><p id="disp-staff-score" class="text-lg font-bold font-data"></p></div>
+                    <div class="p-3 border rounded-xl" style="border-color:var(--border)"><p class="text-[10px] uppercase" style="color:var(--text-muted)">Accuracy</p><p id="disp-staff-perc" class="text-lg font-bold font-data"></p></div>
+                    <div id="disp-staff-level-box" class="p-3 border rounded-xl text-white font-bold uppercase" style="border-color:var(--border)"><p id="disp-staff-level" class="text-lg"></p></div>
+                </div>
+                
+                <textarea id="mgr-comment" placeholder="Competency Comments" class="w-full p-4 border rounded-xl h-24 outline-none" style="border-color:var(--border)"></textarea>
+                <textarea id="mgr-housebrand" placeholder="Housebrand Focus" class="w-full p-4 border rounded-xl h-20 outline-none" style="border-color:var(--border)"></textarea>
+                <textarea id="mgr-gaps" placeholder="Performance Gaps" class="w-full p-4 border rounded-xl h-20 outline-none" style="border-color:var(--border)"></textarea>
+                <textarea id="mgr-recom" placeholder="Recommendations" class="w-full p-4 border rounded-xl h-20 outline-none" style="border-color:var(--border)"></textarea>
+                
+                <button onclick="submitManagerReport()" class="w-full btn-grad p-4 rounded-xl font-bold uppercase active:scale-95 transition">Submit Performance Report</button>
+            </div>
+        </div>
+
+        <div id="view-supervisor-dash" class="hidden animate__animated animate__fadeIn">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <button onclick="goHome()" class="nav-btn bg-white p-2 px-6 rounded-xl shadow font-bold">← Home</button>
+                <button onclick="exportComprehensiveCSV()" class="btn-grad p-3 px-6 rounded-xl font-bold">Linked CSV Export</button>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-center">
+                <div class="glass p-4 rounded-2xl" style="border-bottom:4px solid var(--resources)"><p class="text-[10px] uppercase" style="color:var(--text-muted)">Staff</p><h3 id="stat-staff" class="text-2xl font-bold font-data">0</h3></div>
+                <div class="glass p-4 rounded-2xl" style="border-bottom:4px solid var(--success)"><p class="text-[10px] uppercase" style="color:var(--text-muted)">Avg Acc.</p><h3 id="stat-avg" class="text-2xl font-bold font-data">0%</h3></div>
+                <div class="glass p-4 rounded-2xl" style="border-bottom:4px solid var(--accent)"><p class="text-[10px] uppercase" style="color:var(--text-muted)">Outlets</p><h3 id="stat-outlets" class="text-2xl font-bold font-data">0</h3></div>
+                <div class="glass p-4 rounded-2xl" style="border-bottom:4px solid var(--supervisor)"><p class="text-[10px] uppercase" style="color:var(--text-muted)">Reports</p><h3 id="stat-reports" class="text-2xl font-bold font-data">0</h3></div>
+            </div>
+
+            <div class="glass p-5 rounded-3xl mb-8 flex items-center justify-between gap-3" style="border-left:8px solid var(--accent)">
+                <div>
+                    <h3 class="text-sm font-bold font-display flex items-center gap-1.5" style="color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg>Manage SOPs, Training Materials &amp; Notes</h3>
+                    <p class="text-[11px]" style="color:var(--text-muted)">Adding &amp; editing now lives on the Resources page — tap Manage there (SV2026).</p>
+                </div>
+                <button onclick="openResources()" class="btn-ai px-4 py-3 rounded-xl font-bold text-xs flex-shrink-0">Open Resources →</button>
+            </div>
+
+            <div class="glass p-6 rounded-3xl mb-8" style="border-left:8px solid var(--danger)">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold uppercase text-xs tracking-widest font-display flex items-center gap-1.5" style="color:var(--danger)"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h13l-3 4 3 4H5"/></svg>Training Gaps</h3>
+                    <select id="gap-topic-filter" onchange="renderGapsTable()" class="p-2 text-[10px] border rounded-lg bg-white font-bold" style="border-color:var(--border)"></select>
+                </div>
+                <div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead style="background:var(--danger-soft);color:var(--danger-dark)"><tr><th class="p-3">Question</th><th class="p-3">Correct Answer</th><th class="p-3 text-center">Errors</th></tr></thead><tbody id="table-gaps"></tbody></table></div>
+            </div>
+
+            <div class="glass p-6 rounded-3xl mb-8" style="border-left:8px solid var(--success)">
+                <h3 class="text-xl font-bold mb-4 uppercase text-xs tracking-widest font-display flex items-center gap-1.5" style="color:var(--success)"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 12h5M9.5 15.5h5"/></svg>Manager Reports Intelligence</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div><label class="text-[8px] font-bold uppercase" style="color:var(--text-muted)">Year</label><select id="sup-filter-year" onchange="renderSupervisorStats()" class="w-full p-2 rounded-lg border text-[10px] bg-white font-bold" style="border-color:var(--border)"><option value="ALL">All Time</option><option value="2025">2025</option><option value="2026">2026</option></select></div>
+                    <div><label class="text-[8px] font-bold uppercase" style="color:var(--text-muted)">Outlet</label><select id="sup-filter-outlet" onchange="renderSupervisorStats()" class="w-full p-2 rounded-lg border text-[10px] bg-white font-bold" style="border-color:var(--border)"></select></div>
+                    <div><label class="text-[8px] font-bold uppercase" style="color:var(--text-muted)">Topic</label><select id="sup-filter-topic" onchange="renderSupervisorStats()" class="w-full p-2 rounded-lg border text-[10px] bg-white font-bold" style="border-color:var(--border)"></select></div>
+                    <div><label class="text-[8px] font-bold uppercase" style="color:var(--text-muted)">Auditor</label><select id="sup-filter-manager" onchange="renderSupervisorStats()" class="w-full p-2 rounded-lg border text-[10px] bg-white font-bold" style="border-color:var(--border)"></select></div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-[10px]">
+                        <thead style="background:var(--success-soft);color:#14532D">
+                            <tr><th class="p-2">Personnel</th><th class="p-2">Score</th><th class="p-2">Module</th><th class="p-2">Comments</th><th class="p-2">Focus</th><th class="p-2">Gaps</th><th class="p-2">Recs</th><th class="p-2">Manager</th></tr>
+                        </thead>
+                        <tbody id="table-reports"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="glass p-6 rounded-3xl mt-8">
+                <h3 class="text-xl font-bold mb-4 uppercase text-xs tracking-widest font-display" style="color:var(--text-muted)">Live History Log</h3>
+                <div class="overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr style="background:var(--bg);color:var(--text-muted)"><th class="p-3">Staff</th><th class="p-3">Outlet</th><th class="p-3">Acc %</th><th class="p-3">Topic</th></tr></thead><tbody id="table-log"></tbody></table></div>
+            </div>
+        </div>
+
+        <div id="view-manager-login" class="hidden">
+            <div class="glass p-8 rounded-3xl max-w-md mx-auto space-y-4 text-center">
+                <button onclick="showManagerRoleSelect()" class="nav-btn font-bold mb-2" style="color:var(--primary)">← Back</button>
+                <h2 class="text-2xl font-bold font-display flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Area Manager</h2>
+                <select id="mgr-select" onchange="updateMgrOutlets()" class="w-full p-4 rounded-xl border font-bold bg-white" style="border-color:var(--border)"></select>
+                <select id="mgr-outlet" class="w-full p-4 rounded-xl border font-bold bg-white" style="border-color:var(--border)"></select>
+                <input type="password" id="mgr-pass" placeholder="Pin Code" class="w-full p-4 rounded-xl border text-center font-data" style="border-color:var(--border)">
+                <button onclick="loginManager()" class="w-full btn-grad p-4 rounded-xl font-bold">ENTER DASHBOARD</button>
+            </div>
+        </div>
+        <div id="view-supervisor-login" class="hidden">
+            <div class="glass p-8 rounded-3xl max-w-md mx-auto space-y-4 text-center">
+                <button onclick="goHome()" class="nav-btn font-bold mb-2 flex items-center" style="color:var(--primary)">← Back</button>
+                <h2 class="text-2xl font-bold font-display">Supervisor / Top Management</h2>
+                <input type="password" id="sup-pass" placeholder="PIN" class="w-full p-4 rounded-xl border text-center font-data" style="border-color:var(--border)">
+                <button onclick="loginSupervisor()" class="w-full btn-grad p-4 rounded-xl font-bold">LOGIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyvioLEJ8tFK3766M8fj7wKxS5_qFDkKEKtniei3MHaP-aNkEq7LcwNqaVhcXgr26wKkg/exec"; 
+        let allQuestions = [], allResults = [], allReports = [], allWrongAnswers = [], allContent = [], allQuizSettings = [];
+        let allOutletNotes = [], allAIResults = [], allAIWrongAnswers = [], allReferenceDocs = [];
+        let currentLang = 'en', quizIdx = 0, score = 0, currentQuizData = [], staffWrongs = [];
+        let isQuizRunning = false, isAIQuiz = false, currentOutletMgrOutlet = '';
+
+        const outletList = ["AJ", "B6", "BB", "BJR", "BP", "CDR", "CK", "DG", "DGD", "GB", "GBD", "GM", "HL", "HQ", "HQCT", "JL", "JLD", "JTH", "KB", "KBKK", "KBKS", "KBTJ", "KKR", "KL", "KMD", "KMN", "KMSK", "KS", "MC", "MCD", "MLR", "MR", "PC", "PDM", "PK", "PM", "PP", "PPK", "PSPD", "PT", "RJ", "SLS", "SMR", "ST", "TM", "TMD", "TMT", "TPOH", "TPT", "WM"];
+        const managerData = [
+            { id: "R1 - AMIRUL", outlets: ["DG", "DGD", "KMD", "KMN", "KMSK", "MR"] },
+            { id: "R2 - HAZWANI", outlets: ["AJ", "BJR", "BP", "HQCT", "KB", "WM", "PDM"] },
+            { id: "R3 - HARIS", outlets: ["B6", "BB", "CDR", "HL", "HQ", "KL", "PK"] },
+            { id: "R4 - RAIHAN", outlets: ["GB", "GBD", "JTH", "RJ", "ST", "TPOH"] },
+            { id: "R5 - ADNIN", outlets: ["JL", "JLD", "PP", "PSPD", "SMR"] },
+            { id: "R6 - NADHIRAH", outlets: ["KS", "MC", "MLR", "TM", "TMD", "TMT", "MCD"] },
+            { id: "R7 - HASANUL", outlets: ["KBKK", "KBKS", "KBTJ", "PC", "PT"] },
+            { id: "R8 - HAFSHAM", outlets: ["PM", "SLS", "TPT", "KKR", "PPK"] },
+            { id: "R9 - IFFAH / RAIHAN", outlets: ["GM", "CK"] }
+        ];
+
+        window.onload = fetchData;
+
+        async function fetchData() {
+            setLoader(true, "Synchronizing...");
+            try {
+                const res = await fetch(GAS_URL);
+                const dataRaw = await res.json();
+                allQuestions = dataRaw.questions || [];
+                allWrongAnswers = dataRaw.wrongAnswers || [];
+                allContent = dataRaw.content || [];
+                allQuizSettings = dataRaw.quizSettings || [];
+                allOutletNotes = dataRaw.outletNotes || [];
+                allAIResults = dataRaw.aiResults || [];
+                allAIWrongAnswers = dataRaw.aiWrongAnswers || [];
+                allReferenceDocs = dataRaw.referenceDocs || [];
+                
+                const liveRes = dataRaw.results || [];
+                const archRes = dataRaw.archiveResults || [];
+                allResults = [...liveRes, ...archRes];
+
+                const liveRep = dataRaw.reports || [];
+                const archRep = dataRaw.archiveReports || [];
+                allReports = [...liveRep, ...archRep];
+                
+                initDropdowns();
+                populateGlobalData();
+                renderKBList();
+            } catch (e) { alert("Network sync failed."); }
+            setLoader(false);
+        }
+
+        function showView(id) {
+            document.querySelectorAll('.max-w-4xl > div').forEach(v => {
+                v.classList.add('hidden');
+                v.style.setProperty('display', 'none', 'important');
+            });
+            const target = document.getElementById(id);
+            if(target) {
+                target.classList.remove('hidden');
+                target.style.setProperty('display', 'block', 'important');
+                window.scrollTo(0,0);
+            }
+        }
+
+        function goHome() { isQuizRunning = false; showView('view-main'); }
+        function showManagerRoleSelect() { showView('view-manager-role-select'); }
+
+        function openResources() {
+            document.getElementById('resource-manager-panel').classList.add('hidden');
+            renderResourceList();
+            renderKBList();
+            showView('view-resources');
+        }
+
+        function unlockResourceManager() {
+            const pin = prompt("Enter Supervisor / Top Management password to add or manage resources:");
+            if (pin === null) return;
+            if (pin === "SV2026") {
+                document.getElementById('resource-manager-panel').classList.remove('hidden');
+                document.getElementById('resource-manager-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                alert("Incorrect password.");
+            }
+        }
+
+        function getAllTopics() {
+            const s = new Set();
+            allQuestions.forEach(q => { if(q.topic) s.add(q.topic); });
+            allContent.forEach(c => { if(c.Topic) s.add(c.Topic); });
+            allQuizSettings.forEach(q => { if(q.Topic) s.add(q.Topic); });
+            allResults.forEach(r => { if(r.Topic) s.add(r.Topic); });
+            return [...s].filter(t => t).sort();
+        }
+
+        /** PERFORMANCE HUB **/
+        function revealStaffScore() {
+            const perc = Math.round((score/currentQuizData.length)*100) + "%";
+            document.getElementById('hub-final-perc').innerText = perc;
+            document.getElementById('hub-final-score').innerText = `Marks: ${score} / ${currentQuizData.length}`;
+            const note = document.getElementById('hub-sync-note'), btn = document.getElementById('hub-save-btn');
+            if (isAIQuiz) {
+                note.innerText = "Practice mode — shared with your outlet manager, not your official record.";
+                btn.innerText = "Submit & Exit";
+                btn.onclick = saveAIQuizResult;
+            } else {
+                note.innerText = "Syncing with database...";
+                btn.innerText = "Archive & Exit";
+                btn.onclick = saveQuizResult;
+            }
+            showView('view-staff-score');
+        }
+
+        async function saveQuizResult() {
+            const p = { action: 'save_result', name: document.getElementById('staff-name').value.toUpperCase().trim(), outlet: document.getElementById('staff-outlet').value, topic: document.getElementById('staff-topic').value, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs };
+            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
+            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
+            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
+            alert("Knowledge Record Securely Archived.");
+            location.reload(); 
+        }
+
+        async function saveAIQuizResult() {
+            const attemptId = 'AI' + Date.now();
+            const p = { action: 'save_ai_result', attemptId, name: document.getElementById('staff-name').value.toUpperCase().trim(), outlet: document.getElementById('staff-outlet').value, topic: document.getElementById('staff-topic').value, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs };
+            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
+            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
+            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
+            alert("Practice attempt shared with your outlet manager.");
+            location.reload();
+        }
+
+        /** MANAGER LOGIC (Area Manager) **/
+        async function submitManagerReport() {
+            if(!document.getElementById('rep-date').value) return alert("Select assessment date.");
+            const p = { action: 'save_report', manager: document.getElementById('disp-mgr-name').innerText, outlet: document.getElementById('disp-mgr-outlet').innerText, staffName: document.getElementById('rep-staff').value, staffScore: document.getElementById('disp-staff-perc').innerText, trainTitle: document.getElementById('rep-topic-filter').value, trainingDate: document.getElementById('rep-date').value, level: document.getElementById('disp-staff-level').innerText, comments: document.getElementById('mgr-comment').value, focus: document.getElementById('mgr-housebrand').value, gaps: document.getElementById('mgr-gaps').value, rec: document.getElementById('mgr-recom').value };
+            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
+            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
+            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
+            alert("Report Captured.");
+            document.getElementById('rep-staff').value = "";
+            document.getElementById('mgr-comment').value = "";
+            document.getElementById('mgr-housebrand').value = "";
+            document.getElementById('mgr-gaps').value = "";
+            document.getElementById('mgr-recom').value = "";
+        }
+
+        /** QUIZ LENGTH SETTINGS (per outlet + topic, set by Area Manager) **/
+        function getQuizCount(outlet, topic) {
+            const s = allQuizSettings.find(q => (q.Outlet||"").toString().trim().toUpperCase() === (outlet||"").toUpperCase() && (q.Topic||"").toString().trim() === topic);
+            const n = s ? parseInt(s.Count) : NaN;
+            return (!isNaN(n) && n > 0) ? n : 10;
+        }
+
+        function renderQuizSettingDisplay() {
+            const topic = document.getElementById('qset-topic').value;
+            const outlet = document.getElementById('disp-mgr-outlet').innerText.trim();
+            if(!topic) { document.getElementById('qset-current').innerText = "Select a topic to view/set its quiz length."; return; }
+            const s = allQuizSettings.find(q => (q.Outlet||"").toString().trim().toUpperCase() === outlet.toUpperCase() && (q.Topic||"").toString().trim() === topic);
+            document.getElementById('qset-current').innerText = s ? `Current: ${s.Count} questions for "${topic}" @ ${outlet}` : `No custom length set for "${topic}" @ ${outlet} (default: 10)`;
+        }
+
+        function saveQuizSetting() {
+            const outlet = document.getElementById('disp-mgr-outlet').innerText.trim();
+            const topic = document.getElementById('qset-topic').value;
+            const count = parseInt(document.getElementById('qset-count').value);
+            if(!topic) return alert("Pick a topic first.");
+            if(!count || count < 1) return alert("Enter a valid number of questions.");
+            const manager = document.getElementById('disp-mgr-name').innerText;
+            const p = { action: 'save_quiz_setting', outlet, topic, count, manager };
+            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
+            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
+            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
+            const idx = allQuizSettings.findIndex(q => (q.Outlet||"").toString().trim().toUpperCase() === outlet.toUpperCase() && (q.Topic||"").toString().trim() === topic);
+            if(idx > -1) allQuizSettings[idx].Count = count; else allQuizSettings.push({ Outlet: outlet, Topic: topic, Count: count });
+            renderQuizSettingDisplay();
+            alert(`Quiz length for "${topic}" @ ${outlet} set to ${count} questions.`);
+        }
+
+        /** OUTLET MANAGER: LOGIN, NOTES, AI MONITOR **/
+        function loginOutletManager() {
+            const outlet = document.getElementById('outlet-mgr-outlet').value;
+            const pin = document.getElementById('outlet-mgr-pass').value;
+            if(!outlet) return alert("Select your outlet.");
+            if(pin !== "1234") return alert("Invalid PIN.");
+            currentOutletMgrOutlet = outlet;
+            document.getElementById('disp-outlet-mgr-code').innerText = outlet;
+            populateOutletMgrDropdowns();
+            renderOutletNoteDisplay();
+            renderAIResultsForOutlet();
+            showView('view-outlet-mgr-dash');
+        }
+
+        function populateOutletMgrDropdowns() {
+            const allTopics = getAllTopics();
+            document.getElementById('note-topic').innerHTML = '<option value="">Select topic...</option>' + allTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.getElementById('ai-monitor-topic-filter').innerHTML = '<option value="ALL">All topics</option>' + allTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+
+        function renderOutletNoteDisplay() {
+            const topic = document.getElementById('note-topic').value;
+            const box = document.getElementById('note-body');
+            if(!topic) { box.value = ''; box.placeholder = 'Pick a topic first...'; return; }
+            const n = allOutletNotes.find(x => (x.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase() && (x.Topic||"").toString().trim() === topic);
+            box.value = n ? n.Notes : '';
+            box.placeholder = 'e.g. Focus on cold-chain storage — we had 2 near-misses this month.';
+        }
+
+        function saveOutletNote() {
+            const topic = document.getElementById('note-topic').value;
+            const notes = document.getElementById('note-body').value.trim();
+            if(!topic) return alert("Pick a topic first.");
+            const p = { action: 'save_outlet_note', outlet: currentOutletMgrOutlet, topic, notes, manager: 'Outlet Manager - ' + currentOutletMgrOutlet };
+            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
+            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
+            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
+            const idx = allOutletNotes.findIndex(x => (x.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase() && (x.Topic||"").toString().trim() === topic);
+            if(idx > -1) allOutletNotes[idx].Notes = notes; else allOutletNotes.push({ Outlet: currentOutletMgrOutlet, Topic: topic, Notes: notes });
+            alert("Notes saved. AI Practice for this topic will factor these in.");
+        }
+
+        function renderAIResultsForOutlet() {
+            const f = document.getElementById('ai-monitor-topic-filter').value || 'ALL';
+            const list = document.getElementById('ai-monitor-list');
+            const rows = allAIResults.filter(r => (r.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase() && (f === 'ALL' || (r.Topic||"").toString().trim() === f))
+                .sort((a,b) => new Date(b.Timestamp) - new Date(a.Timestamp));
+            if(!rows.length) { list.innerHTML = '<p class="text-center text-sm py-6" style="color:var(--text-muted)">No AI practice attempts yet for this outlet.</p>'; return; }
+            list.innerHTML = rows.map(r => {
+                const wrongs = allAIWrongAnswers.filter(w => w.AttemptID === r.AttemptID);
+                const wrongHtml = wrongs.length ? wrongs.map(w => `<div class="p-2 rounded border mb-1 bg-white"><p class="font-bold text-[11px]" style="color:var(--danger-dark)">Q: ${w["Question Text"]}</p><p class="font-black text-[11px] mt-1" style="color:var(--success)">✓ Correct: ${w["Correct Answer"]}</p></div>`).join('') : '<p class="text-[11px]" style="color:var(--text-muted)">Perfect score — no missed questions.</p>';
+                return `
+                <details class="rounded-xl border p-3" style="border-color:var(--border)">
+                    <summary class="flex justify-between items-center cursor-pointer font-bold text-sm">
+                        <span class="uppercase">${r.Name}</span>
+                        <span class="font-data" style="color:var(--accent-dark)">${r.Percentage}</span>
+                    </summary>
+                    <p class="text-[10px] mt-1" style="color:var(--text-muted)">${r.Topic} · ${r.Score}</p>
+                    <div class="mt-2 space-y-1">${wrongHtml}</div>
+                </details>`;
+            }).join('');
+        }
+
+        /** KNOWLEDGE BASE (Supervisor / Top Management add; everyone can view) **/
+        function addKnowledgeItem() {
+            const category = document.getElementById('kb-category').value;
+            const topic = document.getElementById('kb-topic').value.trim();
+            const title = document.getElementById('kb-title').value.trim();
+            const body = document.getElementById('kb-body').value.trim();
+            const link = document.getElementById('kb-link').value.trim();
+            if(!topic || !title || !body) return alert("Topic, Title and Content are required.");
+            const p = { action: 'save_content', topic, category, title, body, link };
+            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
+            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
+            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
+            allContent.unshift({ ID: 'local-' + Date.now(), Topic: topic, Category: category, Title: title, Body: body, Link: link, Timestamp: new Date().toISOString() });
+            document.getElementById('kb-title').value = '';
+            document.getElementById('kb-body').value = '';
+            document.getElementById('kb-link').value = '';
+            document.getElementById('kb-topic').value = '';
+            renderKBList();
+            populateGlobalData();
+            alert("Added to knowledge base.");
+        }
+
+        function renderKBList() {
+            const list = document.getElementById('kb-list');
+            if(!list) return;
+            list.innerHTML = allContent.length ? allContent.map(c => `
+                <div class="bg-white p-3 rounded-xl border flex justify-between items-start gap-2" style="border-color:var(--border)">
+                    <div class="min-w-0">
+                        <span class="badge" style="background:var(--primary-soft);color:var(--primary-dark)">${c.Category||'Note'}</span>
+                        <span class="text-[9px] font-bold ml-1" style="color:var(--text-muted)">${c.Topic}</span>
+                        <p class="font-bold text-sm mt-1">${c.Title}</p>
+                        <p class="text-xs mt-1 line-clamp-2" style="color:var(--text-muted)">${(c.Body||'')}</p>
+                        ${c.Link ? `<a href="${c.Link}" target="_blank" class="text-[10px] font-bold underline" style="color:var(--primary)">Open Link ↗</a>` : ''}
+                    </div>
+                    <button onclick="deleteKnowledgeItem('${c.ID}')" class="text-lg leading-none flex-shrink-0" style="color:var(--danger)">✕</button>
+                </div>`).join('') : '<p class="text-center text-sm py-6" style="color:var(--text-muted)">No materials yet — add your first SOP or guideline above.</p>';
+        }
+
+        function deleteKnowledgeItem(id) {
+            if(!confirm("Remove this item from the knowledge base?")) return;
+            const p = { action: 'delete_content', id };
+            const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
+            if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
+            else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
+            allContent = allContent.filter(c => c.ID !== id);
+            renderKBList();
+        }
+
+        function resourceCardHtml(c) {
+            return `
+                <div class="bg-white p-4 rounded-xl border mb-3" style="border-color:var(--border)">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="badge" style="background:var(--primary-soft);color:var(--primary-dark)">${c.Category||'Note'}</span>
+                        <span class="text-[9px] font-bold" style="color:var(--text-muted)">${c.Topic}</span>
+                    </div>
+                    <p class="font-bold">${c.Title}</p>
+                    <p class="text-sm mt-1 whitespace-pre-line" style="color:var(--text-muted)">${c.Body}</p>
+                    ${c.Link ? `<a href="${c.Link}" target="_blank" class="text-xs font-bold underline mt-2 inline-block" style="color:var(--primary)">Open Resource ↗</a>` : ''}
+                </div>`;
+        }
+
+        // Resources are grouped into 3 sections for browsing. "Notes & Guidelines"
+        // combines the Note and Guideline categories; SOP and Training Material
+        // each get their own section. (Adding still offers all 4 categories.)
+        function referenceDocHtml(d) {
+            return `
+                <div class="bg-white p-4 rounded-xl border mb-3" style="border-color:var(--border)">
+                    <div class="flex justify-between items-center gap-2">
+                        <div class="min-w-0">
+                            <span class="badge" style="background:var(--accent-soft);color:var(--accent-dark)">${d.Kind}</span>
+                            <p class="font-bold mt-1 truncate">${d.Name}</p>
+                        </div>
+                        <div class="flex gap-2 flex-shrink-0">
+                            <button onclick="toggleDocPreview('${d.ID}')" class="text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
+                            <a href="${d.DownloadURL}" target="_blank" class="text-xs font-bold px-3 py-2 rounded-lg" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border)">Download</a>
+                        </div>
+                    </div>
+                    <div id="doc-preview-${d.ID}" class="hidden mt-3">
+                        <iframe src="${d.PreviewURL}" class="w-full rounded-lg border" style="height:70vh;border-color:var(--border)" loading="lazy"></iframe>
+                    </div>
+                </div>`;
+        }
+
+        function toggleDocPreview(id) {
+            document.getElementById('doc-preview-' + id).classList.toggle('hidden');
+        }
+
+        function renderResourceList() {
+            const f = document.getElementById('res-topic-filter').value || 'ALL';
+            const items = allContent.filter(c => f === 'ALL' || c.Topic === f);
+            const icoClipboard = '<svg viewBox="0 0 24 24" class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/></svg>';
+            const icoBook = '<svg viewBox="0 0 24 24" class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg>';
+            const icoDoc = '<svg viewBox="0 0 24 24" class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 12h5M9.5 15.5h5"/></svg>';
+            const icoFolder = '<svg viewBox="0 0 24 24" class="w-3.5 h-3.5 inline -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2.5h8.5A1.5 1.5 0 0 1 21 9v9.5A1.5 1.5 0 0 1 19.5 20h-15A1.5 1.5 0 0 1 3 18.5v-12z"/></svg>';
+            const sections = [
+                { label: 'SOP Compilation', icon: icoClipboard, match: c => (c.Category||'') === 'SOP' },
+                { label: 'Training Materials', icon: icoBook, match: c => (c.Category||'') === 'Training Material' },
+                { label: 'Notes & Guidelines', icon: icoDoc, match: c => (c.Category||'') === 'Note' || (c.Category||'') === 'Guideline' }
+            ];
+            const refDocsHtml = `
+                <div class="mb-6">
+                    <p class="text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1.5" style="color:var(--accent-dark)">${icoFolder} Reference Documents <span style="color:var(--text-muted)">(${allReferenceDocs.length})</span></p>
+                    ${allReferenceDocs.length ? allReferenceDocs.map(referenceDocHtml).join('') : `<p class="text-xs italic py-2" style="color:var(--text-muted)">Nothing dropped in the reference folder yet.</p>`}
+                </div>`;
+            const categoryHtml = sections.map(sec => {
+                const arr = items.filter(sec.match);
+                return `
+                <div class="mb-6">
+                    <p class="text-xs font-black uppercase tracking-widest mb-2 flex items-center gap-1.5" style="color:var(--primary)">${sec.icon} ${sec.label} <span style="color:var(--text-muted)">(${arr.length})</span></p>
+                    ${arr.length ? arr.map(resourceCardHtml).join('') : `<p class="text-xs italic py-2" style="color:var(--text-muted)">Nothing here yet.</p>`}
+                </div>`;
+            }).join('');
+            document.getElementById('res-list').innerHTML = refDocsHtml + categoryHtml;
+        }
+
+        /** AI QUIZ GENERATION **/
+        function refreshQuizModeInfo() {
+            const topic = document.getElementById('staff-topic').value;
+            const info = document.getElementById('quiz-mode-info');
+            if(!topic) { info.innerText = "Standard uses the official question bank · AI Practice generates fresh questions and is shared with your outlet manager, not your official record."; return; }
+            const bankCount = allQuestions.filter(q => q.topic == topic).length;
+            const hasMaterial = allContent.some(c => c.Topic === topic);
+            info.innerText = `Standard bank: ${bankCount} question(s) available for "${topic}". AI Practice: ${hasMaterial ? 'training material found, ready to generate' : 'no material uploaded yet — AI will use general best practice'}.`;
+        }
+
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function validateStaffEntry() {
+            const n = document.getElementById('staff-name').value, t = document.getElementById('staff-topic').value, o = document.getElementById('staff-outlet').value;
+            if(!n || !t || !o) { alert("All fields required"); return null; }
+            return { n, t, o };
+        }
+
+        async function generateAIQuiz() {
+            const entry = validateStaffEntry();
+            if(!entry) return;
+            const count = getQuizCount(entry.o, entry.t);
+            setLoader(true, "Generating AI questions...");
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'generate_quiz', topic: entry.t, outlet: entry.o, count })
+                });
+                const data = await res.json();
+                if(!data.questions || !data.questions.length) throw new Error("empty");
+                currentQuizData = data.questions;
+                quizIdx = 0; score = 0; staffWrongs = [];
+                isAIQuiz = true;
+                isQuizRunning = true;
+                document.getElementById('quiz-mode-badge').classList.remove('hidden');
+                document.getElementById('submit-quiz-btn').innerText = 'Finish Practice';
+                renderQuestion();
+                showView('view-quiz');
+            } catch(e) {
+                alert("AI quiz generation failed. Please try Standard Quiz, or try again in a moment.");
+            }
+            setLoader(false);
+        }
+
+        /** SUPERVISOR INTEL **/
+        function renderSupervisorStats() {
+            const fY = document.getElementById('sup-filter-year').value;
+            const fO = document.getElementById('sup-filter-outlet').value;
+            const fT = document.getElementById('sup-filter-topic').value;
+            const fM = document.getElementById('sup-filter-manager').value;
+
+            const filteredReports = allReports.filter(r => {
+                const topic = r["Training Title"] || r["Topic"] || "Unknown";
+                const manager = r["Manager"] || "Unknown";
+                const ts = r["Timestamp"] || r["Date"] || Date.now();
+                const year = new Date(ts).getFullYear().toString();
+
+                const matchY = fY === 'ALL' || year === fY;
+                const matchO = fO === 'ALL' || r.Outlet === fO;
+                const matchT = fT === 'ALL' || topic === fT;
+                const matchM = fM === 'ALL' || manager === fM;
+                return matchY && matchO && matchT && matchM;
+            });
+
+            document.getElementById('table-reports').innerHTML = filteredReports.map(r => `<tr><td class="p-2 font-bold uppercase">${r["Staff Name"]||r["Personnel"]}</td><td class="p-2">${r["Quiz Score"]}</td><td class="p-2">${r["Training Title"]||r["Topic"]}</td><td class="p-2">${r["Competency Comments"]||"-"}</td><td class="p-2">${r["Housebrand Focus"]||"-"}</td><td class="p-2" style="color:var(--danger)">${r["Performance Gaps"]||"-"}</td><td class="p-2">${r["Recommendations"]||"-"}</td><td class="p-2 italic">${r.Manager}</td></tr>`).join('');
+            
+            document.getElementById('stat-staff').innerText = [...new Set(allResults.map(r => r.Name))].length;
+            document.getElementById('stat-reports').innerText = filteredReports.length;
+            document.getElementById('stat-outlets').innerText = [...new Set(allResults.map(r => r.Outlet))].length;
+            const avg = allResults.reduce((a,b) => a + parseInt(formatToPercent(b.Percentage)), 0) / (allResults.length || 1);
+            document.getElementById('stat-avg').innerText = Math.round(avg) + "%";
+            document.getElementById('table-log').innerHTML = allResults.sort((a,b) => new Date(b.Timestamp) - new Date(a.Timestamp)).slice(0, 50).map(r => `<tr><td class="p-3 font-bold uppercase">${r.Name}</td><td>${r.Outlet}</td><td class="font-bold" style="color:var(--primary)">${formatToPercent(r.Percentage)}</td><td>${r.Topic}</td></tr>`).join('');
+            renderGapsTable();
+        }
+
+        /** LOGIC HANDLERS **/
+        function onStaffSelect() {
+            const n = document.getElementById('rep-staff').value, o = document.getElementById('disp-mgr-outlet').innerText.trim().toUpperCase(), topic = document.getElementById('rep-topic-filter').value;
+            const r = allResults.find(x => (x.Name || "").trim().toUpperCase() === n.trim().toUpperCase() && (x.Outlet || "").trim().toUpperCase() === o && (x.Topic || "").trim() === topic);
+            const list = document.getElementById('wrongs-list'), cont = document.getElementById('wrongs-container');
+            if(r) {
+                let scoreRaw = r.Score;
+                if (scoreRaw instanceof Date || (typeof scoreRaw === 'string' && scoreRaw.includes('T') && scoreRaw.includes('Z'))) {
+                    const d = new Date(scoreRaw);
+                    scoreRaw = `${d.getDate()}/${d.getMonth() + 1}`;
+                }
+                document.getElementById('disp-staff-score').innerText = scoreRaw;
+                document.getElementById('disp-staff-perc').innerText = formatToPercent(r.Percentage);
+                const p = parseInt(formatToPercent(r.Percentage)), lvl = p >= 85 ? "HIGH" : (p >= 71 ? "MEDIUM" : "LOW");
+                document.getElementById('disp-staff-level').innerText = lvl;
+                document.getElementById('disp-staff-level-box').style.backgroundColor = lvl === "HIGH" ? "#16A34A" : (lvl === "MEDIUM" ? "#F2A93C" : "#D33A63");
+                const gaps = allWrongAnswers.filter(w => (w["Staff Name"] || "").trim().toUpperCase() === n.trim().toUpperCase() && (w["Topic"] || "").trim() === topic);
+                if(gaps.length > 0) {
+                    cont.classList.remove('hidden');
+                    list.innerHTML = gaps.map(w => `<div class="bg-white p-2 rounded border mb-1"><p class="font-bold text-[11px]" style="color:var(--danger-dark)">Q: ${w["Question Text"]}</p><p class="font-black text-[11px] mt-1" style="color:var(--success)">✓ Correct: ${w["Correct Answer"]}</p></div>`).join('');
+                } else cont.classList.add('hidden');
+            }
+        }
+
+        function populateGlobalData() {
+            const topics = [...new Set(allQuestions.filter(q => (q.status || q.Status || q.STATUS) !== "Inactive").map(q => q.topic))].filter(t => t);
+            const dbTopics = [...new Set(allResults.map(r => r.Topic))].filter(t => t);
+            const allTopics = getAllTopics();
+
+            document.getElementById('staff-topic').innerHTML = '<option value="">Module selection...</option>' + allTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.getElementById('rep-topic-filter').innerHTML = '<option value="">Personnel module...</option>' + dbTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.getElementById('gap-topic-filter').innerHTML = '<option value="ALL">All topics</option>' + topics.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.getElementById('sup-filter-topic').innerHTML = '<option value="ALL">All topics</option>' + dbTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+
+            document.getElementById('kb-topic-list').innerHTML = allTopics.map(t => `<option value="${t}">`).join('');
+            document.getElementById('qset-topic').innerHTML = '<option value="">Select topic...</option>' + allTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.getElementById('res-topic-filter').innerHTML = '<option value="ALL">All topics</option>' + allTopics.map(t => `<option value="${t}">${t}</option>`).join('');
+        }
+
+        function renderGapsTable() {
+            const f = document.getElementById('gap-topic-filter').value, g = {};
+            allWrongAnswers.forEach(w => {
+                if(f === "ALL" || (w["Topic"] || "").toString().trim() === f) {
+                    const qText = w["Question Text"];
+                    if(!g[qText]) g[qText] = { correct: w["Correct Answer"], count: 0 };
+                    g[qText].count++;
+                }
+            });
+            const s = Object.entries(g).sort((a,b) => b[1].count - a[1].count).slice(0, 8);
+            document.getElementById('table-gaps').innerHTML = s.length ? s.map(([q, d]) => `<tr><td class="p-3 text-[11px]">${q}</td><td class="p-3 text-[11px] font-bold" style="color:var(--success)">${d.correct}</td><td class="p-3 text-center"><span class="badge" style="background:var(--danger-soft);color:var(--danger)">${d.count}</span></td></tr>`).join('') : '<tr><td colspan="3" class="p-4 text-center">No Gaps.</td></tr>';
+        }
+
+        /** CORE UTILS **/
+        function loginSupervisor() { if(document.getElementById('sup-pass').value === "SV2026") { showView('view-supervisor-dash'); setTimeout(renderSupervisorStats, 200); } else alert("Access Denied."); }
+        function loginManager() {
+            const id = document.getElementById('mgr-select').value, o = document.getElementById('mgr-outlet').value, pin = document.getElementById('mgr-pass').value;
+            if(!id || !o) return alert("Select Creds.");
+            if(pin === "1234") {
+                const m = managerData.find(x => x.id === id);
+                if (m && m.outlets.includes(o)) {
+                    document.getElementById('disp-mgr-name').innerText = id;
+                    document.getElementById('disp-mgr-outlet').innerText = o;
+                    showView('view-manager-form');
+                    renderQuizSettingDisplay();
+                } else alert("Outlet Mismatch.");
+            } else alert("Invalid PIN.");
+        }
+        function initDropdowns() {
+            const opts = outletList.map(o => `<option value="${o}">${o}</option>`).join('');
+            document.getElementById('staff-outlet').innerHTML = '<option value="">Select Outlet</option>' + opts;
+            document.getElementById('mgr-select').innerHTML = '<option value="">Select Auditor</option>' + managerData.map(m => `<option value="${m.id}">${m.id}</option>`).join('');
+            document.getElementById('sup-filter-outlet').innerHTML = '<option value="ALL">All locations</option>' + opts;
+            document.getElementById('sup-filter-manager').innerHTML = '<option value="ALL">All auditors</option>' + managerData.map(m => `<option value="${m.id}">${m.id}</option>`).join('');
+            document.getElementById('outlet-mgr-outlet').innerHTML = '<option value="">Select Outlet</option>' + opts;
+        }
+        function updateMgrOutlets() {
+            const id = document.getElementById('mgr-select').value, outS = document.getElementById('mgr-outlet'), m = managerData.find(x => x.id === id);
+            outS.innerHTML = '<option value="">Select Outlet</option>';
+            if(m) m.outlets.forEach(o => outS.innerHTML += `<option value="${o}">${o}</option>`);
+        }
+        function updateStaffByTopic() {
+            const topic = document.getElementById('rep-topic-filter').value, outlet = document.getElementById('disp-mgr-outlet').innerText.trim().toUpperCase(), staffSelect = document.getElementById('rep-staff');
+            staffSelect.innerHTML = '<option value="">Personnel...</option>';
+            if(!topic) return;
+            allResults.filter(r => (r.Outlet || "").toString().trim().toUpperCase() === outlet && (r.Topic || "").toString().trim() === topic).forEach(r => {
+                const isSub = allReports.some(rep => (rep["Staff Name"] || rep["Personnel"] || "").toString().trim().toUpperCase() === (r.Name || "").toString().trim().toUpperCase() && (rep["Training Title"] || rep["Topic"] || "").toString().trim() === topic);
+                staffSelect.innerHTML += `<option value="${r.Name}">${isSub ? "✓" : "–"} ${r.Name}</option>`;
+            });
+        }
+        function setLang(l) {
+            currentLang = l;
+            document.getElementById('lang-en').style.cssText = l === 'en' ? 'border-color:var(--primary);background:var(--primary);color:white;' : 'border-color:var(--border);background:white;color:var(--text);';
+            document.getElementById('lang-ms').style.cssText = l === 'ms' ? 'border-color:var(--primary);background:var(--primary);color:white;' : 'border-color:var(--border);background:white;color:var(--text);';
+        }
+        function setLoader(show, text = "Loading...") { const l = document.getElementById('loader'); document.getElementById('loader-text').innerText = text; if(show) l.classList.remove('hidden'); else l.classList.add('hidden'); }
+        function formatToPercent(v) { let n = parseFloat(v); if(isNaN(n)) return "0%"; if (n > 0 && n <= 1) return Math.round(n * 100) + "%"; return Math.round(n) + "%"; }
+        function renderProgressBar() {
+            const pct = Math.round((quizIdx / currentQuizData.length) * 100);
+            document.getElementById('progress-fill').style.width = pct + '%';
+        }
+        function handleChoice(idx, btn, q) {
+            const correctIdx = parseInt(q.correct), buttons = document.querySelectorAll('.opt-btn');
+            buttons.forEach(b => b.style.pointerEvents = 'none'); 
+            if (idx === correctIdx) { btn.classList.add('opt-correct'); score++; } else {
+                btn.classList.add('opt-wrong'); buttons[correctIdx].classList.add('opt-correct'); 
+                staffWrongs.push({ qText: currentLang === 'en' ? q.question_en : (q.question_ms || q.question_en), userChoice: btn.innerText, correctText: currentLang === 'en' ? q[`opt${correctIdx + 1}_en`] : (q[`opt${correctIdx+1}_ms`] || q[`opt${correctIdx+1}_en`]) });
+            }
+            if (quizIdx < currentQuizData.length - 1) document.getElementById('next-btn').classList.remove('hidden');
+            else document.getElementById('submit-quiz-btn').classList.remove('hidden');
+        }
+        function renderQuestion() {
+            const q = currentQuizData[quizIdx];
+            document.getElementById('quiz-progress').innerText = `Q ${quizIdx+1}/${currentQuizData.length}`;
+            renderProgressBar();
+            document.getElementById('q-text').innerText = currentLang === 'en' ? q.question_en : (q.question_ms || q.question_en);
+            const grid = document.getElementById('options-grid'); grid.innerHTML = '';
+            for(let i=1; i<=4; i++) {
+                let opt = currentLang === 'en' ? q[`opt${i}_en`] : (q[`opt${i}_ms`] || q[`opt${i}_en`]);
+                let txt = (opt !== undefined && opt !== null) ? opt.toString().trim() : "";
+                if (txt !== "" && txt.toLowerCase() !== "undefined") {
+                    const b = document.createElement('button'); b.className = "opt-btn shadow-sm animate__animated animate__fadeInUp";
+                    b.innerText = txt; b.onclick = () => handleChoice(i - 1, b, q); grid.appendChild(b);
+                }
+            }
+            document.getElementById('next-btn').classList.add('hidden'); document.getElementById('submit-quiz-btn').classList.add('hidden');
+        }
+        function nextQuestion() { quizIdx++; renderQuestion(); }
+        function startQuiz() {
+            const entry = validateStaffEntry();
+            if(!entry) return;
+            const pool = shuffleArray(allQuestions.filter(q => q.topic == entry.t));
+            if(!pool.length) return alert(`No standard questions available yet for "${entry.t}". Try AI Practice instead.`);
+            const count = getQuizCount(entry.o, entry.t);
+            currentQuizData = pool.slice(0, count > 0 ? count : pool.length);
+            quizIdx = 0; score = 0; staffWrongs = [];
+            isAIQuiz = false;
+            isQuizRunning = true;
+            document.getElementById('quiz-mode-badge').classList.add('hidden');
+            document.getElementById('submit-quiz-btn').innerText = 'Submit Intel';
+            renderQuestion(); showView('view-quiz');
+        }
+        function exportComprehensiveCSV() {
+            if (allResults.length === 0) return alert("No data");
+            const wrap = (t) => `"${(t || "").toString().replace(/"/g, "'").trim()}"`;
+            let csv = "Date,Personnel,Auditor,Module,Score,Comments,Housebrand,Gaps,Recs,Outlet\n";
+            allReports.forEach(r => {
+                csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
+            });
+            const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.3.csv`; l.click();
+        }
+    </script>
+</body>
+</html>
