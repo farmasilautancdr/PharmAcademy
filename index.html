@@ -115,7 +115,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.5</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.6</span></p>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <div onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
@@ -648,12 +648,13 @@
                     body: JSON.stringify({ action: 'create_ai_quiz', outlet: currentOutletMgrOutlet, sourceType, sourceValue, topicLabel, count, extraNotes, manager })
                 });
                 const data = await res.json();
-                if(!data.passcode) throw new Error("no passcode");
+                if(data.error) throw new Error(data.error);
+                if(!data.passcode) throw new Error("Server didn't return a passcode.");
                 document.getElementById('quiz-passcode-value').innerText = data.passcode;
                 document.getElementById('quiz-passcode-meta').innerText = `${data.count} question(s) · "${data.topic}" · share this with your team`;
                 document.getElementById('quiz-passcode-display').classList.remove('hidden');
             } catch(e) {
-                alert("Quiz generation failed. Please try again.");
+                alert("Quiz generation failed: " + e.message);
             }
             setLoader(false);
         }
@@ -890,7 +891,7 @@
                 renderQuestion();
                 showView('view-quiz');
             } catch(e) {
-                alert("That code didn't match an active quiz for your outlet. Double-check with your outlet manager.");
+                alert(e.message === "empty" ? "That code didn't match an active quiz for your outlet. Double-check with your outlet manager." : e.message);
             }
             setLoader(false);
         }
@@ -1075,7 +1076,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.5.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.6.csv`; l.click();
         }
     </script>
 </body>
