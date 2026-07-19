@@ -17,7 +17,7 @@
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js')
         .then(reg => console.log('SW Registered'))
-        .catch(err => console.log('SW Registration Failed', err));
+        .catch(err => console.log('SW registration skipped (expected if previewing this file directly rather than from your deployed domain — see sw.js path):', err));
     });
   }
 </script>
@@ -115,7 +115,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.8</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.9</span></p>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                 <div onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
@@ -281,6 +281,7 @@
                         <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Share this code with your team</p>
                         <p id="quiz-passcode-value" class="text-4xl font-bold font-data tracking-widest" style="color:var(--accent-dark)"></p>
                         <p id="quiz-passcode-meta" class="text-[11px]" style="color:var(--text-muted)"></p>
+                        <p id="quiz-passcode-timer" class="text-xs font-bold font-data mt-1"></p>
                     </div>
                 </div>
 
@@ -603,6 +604,8 @@
         }
 
         /** OUTLET MANAGER: LOGIN, NOTES, AI MONITOR **/
+        let quizTimerInterval = null;
+
         function loginOutletManager() {
             const outlet = document.getElementById('outlet-mgr-outlet').value;
             const pin = document.getElementById('outlet-mgr-pass').value;
@@ -611,9 +614,50 @@
             currentOutletMgrOutlet = outlet;
             document.getElementById('disp-outlet-mgr-code').innerText = outlet;
             populateOutletMgrDropdowns();
-            document.getElementById('quiz-passcode-display').classList.add('hidden');
+            loadActiveQuizForOutlet();
             renderAIResultsForOutlet();
             showView('view-outlet-mgr-dash');
+        }
+
+        async function loadActiveQuizForOutlet() {
+            document.getElementById('quiz-passcode-display').classList.add('hidden');
+            if(quizTimerInterval) clearInterval(quizTimerInterval);
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'get_outlet_active_quiz', outlet: currentOutletMgrOutlet })
+                });
+                const data = await res.json();
+                if(data.active && data.passcode) showPasscodeDisplay(data.passcode, data.topic, data.count, data.createdAt);
+            } catch(e) { /* no active code to show — fine, stays hidden */ }
+        }
+
+        function showPasscodeDisplay(passcode, topic, count, createdAtISO) {
+            document.getElementById('quiz-passcode-value').innerText = passcode;
+            document.getElementById('quiz-passcode-meta').innerText = `${count} question(s) · "${topic}"`;
+            document.getElementById('quiz-passcode-display').classList.remove('hidden');
+            startPasscodeCountdown(createdAtISO);
+        }
+
+        function startPasscodeCountdown(createdAtISO) {
+            if(quizTimerInterval) clearInterval(quizTimerInterval);
+            const expiresAt = new Date(createdAtISO).getTime() + 60 * 60 * 1000;
+            const timerEl = document.getElementById('quiz-passcode-timer');
+            function tick() {
+                const remaining = expiresAt - Date.now();
+                if(remaining <= 0) {
+                    timerEl.innerText = 'Expired — generate a new code';
+                    timerEl.style.color = 'var(--danger)';
+                    clearInterval(quizTimerInterval);
+                    return;
+                }
+                const mins = Math.floor(remaining / 60000);
+                const secs = Math.floor((remaining % 60000) / 1000);
+                timerEl.innerText = `Expires in ${mins}:${secs.toString().padStart(2,'0')}`;
+                timerEl.style.color = 'var(--accent-dark)';
+            }
+            tick();
+            quizTimerInterval = setInterval(tick, 1000);
         }
 
         function populateOutletMgrDropdowns() {
@@ -647,7 +691,7 @@
 
         async function createAIQuiz() {
             const raw = document.getElementById('quiz-source-select').value;
-            if(!raw) return alert("Pick a topic or resource first.");
+            if(!raw) return alert("Pick a resource first.");
             const [sourceType, ...rest] = raw.split(':');
             const sourceValue = rest.join(':');
             const topicLabel = document.getElementById('quiz-source-select').selectedOptions[0].innerText;
@@ -664,11 +708,7 @@
                 const data = await res.json();
                 if(data.error) throw new Error(data.error);
                 if(!data.passcode) throw new Error("Server didn't return a passcode.");
-                document.getElementById('quiz-passcode-value').innerText = data.passcode;
-                const expiresAt = new Date(Date.now() + (data.expiresInMinutes || 60) * 60000);
-                const expiresLabel = expiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                document.getElementById('quiz-passcode-meta').innerText = `${data.count} question(s) · "${data.topic}" · expires ${expiresLabel} · share this with your team`;
-                document.getElementById('quiz-passcode-display').classList.remove('hidden');
+                showPasscodeDisplay(data.passcode, data.topic, data.count, data.createdAt);
             } catch(e) {
                 alert("Quiz generation failed: " + e.message);
             }
@@ -1109,7 +1149,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.8.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.9.csv`; l.click();
         }
     </script>
 </body>
