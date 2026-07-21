@@ -124,7 +124,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.20</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.21</span></p>
             </header>
             <p class="text-center font-bold mb-5" style="color:var(--text-muted)">Which team are you with?</p>
             <div class="space-y-4 max-w-md mx-auto">
@@ -134,11 +134,15 @@
                 </button>
                 <button onclick="selectCategory('warehouse')" class="w-full p-6 rounded-3xl text-left flex items-center gap-4 active:scale-95 transition" style="background:var(--warehouse);color:white;">
                     <svg viewBox="0 0 24 24" class="w-9 h-9 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4-9-4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>
-                    <span><span class="block font-display text-lg font-bold">Warehouse</span><span class="block text-xs opacity-90 font-normal">Training resources only</span></span>
+                    <span><span class="block font-display text-lg font-bold">Warehouse</span><span class="block text-xs opacity-90 font-normal">AI practice &amp; training resources</span></span>
                 </button>
-                <button onclick="promptManagerCategory()" class="w-full p-6 rounded-3xl text-left flex items-center gap-4 active:scale-95 transition" style="background:var(--success);color:white;">
+                <button onclick="promptManagerCategory('retail_manager')" class="w-full p-6 rounded-3xl text-left flex items-center gap-4 active:scale-95 transition" style="background:var(--success);color:white;">
                     <svg viewBox="0 0 24 24" class="w-9 h-9 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4.5"/></svg>
-                    <span><span class="block font-display text-lg font-bold">Manager</span><span class="block text-xs opacity-90 font-normal">Full access · PIN required</span></span>
+                    <span><span class="block font-display text-lg font-bold">Retail Manager</span><span class="block text-xs opacity-90 font-normal">Full retail access · PIN required</span></span>
+                </button>
+                <button onclick="promptManagerCategory('warehouse_manager')" class="w-full p-6 rounded-3xl text-left flex items-center gap-4 active:scale-95 transition" style="background:var(--accent-dark);color:white;">
+                    <svg viewBox="0 0 24 24" class="w-9 h-9 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4-9-4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>
+                    <span><span class="block font-display text-lg font-bold">Warehouse Manager</span><span class="block text-xs opacity-90 font-normal">Manage staff &amp; quizzes · PIN required</span></span>
                 </button>
             </div>
         </div>
@@ -156,23 +160,31 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.20</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.21</span></p>
                 <button onclick="showView('view-category-select')" class="text-xs font-bold mt-2 underline" style="color:var(--text-muted)">Switch category</button>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                <div data-cat="retail,manager" onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
+                <div data-cat="retail,retail_manager" onclick="showView('view-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--primary)">
                     <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div></div>
                     <h2 class="text-base md:text-xl font-bold font-display">Staff</h2>
                 </div>
-                <div data-cat="manager" onclick="showManagerRoleSelect()" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--accent)">
+                <div data-cat="warehouse" onclick="showView('view-warehouse-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--warehouse)">
+                    <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--warehouse-soft);color:var(--warehouse)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div></div>
+                    <h2 class="text-base md:text-xl font-bold font-display">Staff</h2>
+                </div>
+                <div data-cat="retail_manager" onclick="showManagerRoleSelect()" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--accent)">
                     <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--accent-soft);color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg></div></div>
                     <h2 class="text-base md:text-xl font-bold font-display">Manager</h2>
                 </div>
-                <div data-cat="manager" onclick="showView('view-supervisor-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--supervisor)">
+                <div data-cat="warehouse_manager" onclick="showView('view-warehouse-mgr-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--accent-dark)">
+                    <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--accent-soft);color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg></div></div>
+                    <h2 class="text-base md:text-xl font-bold font-display">Manage Warehouse</h2>
+                </div>
+                <div data-cat="retail_manager,warehouse_manager" onclick="showView('view-supervisor-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--supervisor)">
                     <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--supervisor-soft);color:var(--supervisor)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4.5"/></svg></div></div>
                     <h2 class="text-base md:text-xl font-bold font-display">Supervisor</h2>
                 </div>
-                <div data-cat="retail,warehouse,manager" onclick="openResources()" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--resources)">
+                <div data-cat="retail,warehouse,retail_manager,warehouse_manager" onclick="openResources()" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--resources)">
                     <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--resources-soft);color:var(--resources)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg></div></div>
                     <h2 class="text-base md:text-xl font-bold font-display">Resources</h2>
                 </div>
@@ -200,24 +212,64 @@
         <div id="view-staff-login" class="hidden">
             <div class="glass p-6 md:p-8 rounded-3xl space-y-4">
                 <button onclick="goHome()" class="nav-btn font-bold mb-2" style="color:var(--primary)">← Back</button>
-                <h2 class="text-2xl font-bold font-display">Staff Entry</h2>
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="setLang('en')" id="lang-en" class="p-3 rounded-xl border-2 font-bold" style="border-color:var(--primary);background:var(--primary);color:white;">English</button>
-                    <button onclick="setLang('ms')" id="lang-ms" class="p-3 rounded-xl border-2 font-bold" style="border-color:var(--border);">Malay</button>
-                </div>
-                <input type="text" id="staff-name" placeholder="Full Name" class="w-full p-4 rounded-xl border uppercase" style="border-color:var(--border)">
-                <select id="staff-outlet" class="w-full p-4 rounded-xl border bg-white" style="border-color:var(--border)"></select>
-                <select id="staff-topic" onchange="refreshQuizModeInfo()" class="w-full p-4 rounded-xl border bg-white font-bold" style="border-color:var(--border);color:var(--primary)"></select>
+                <h2 class="text-2xl font-bold font-display">Staff Login</h2>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="startQuiz()" class="btn-grad p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12l2 2 4-4.5"/></svg>Standard Quiz</button>
-                    <button onclick="revealAIPasscodeEntry()" class="btn-ai p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/><path d="M7.5 15h9"/></svg>AI Practice</button>
+                <div id="staff-login-fields" class="space-y-3">
+                    <select id="staff-outlet" onchange="populateStaffNameOptions('retail')" class="w-full p-4 rounded-xl border bg-white" style="border-color:var(--border)"></select>
+                    <select id="staff-name-select" class="w-full p-4 rounded-xl border bg-white font-bold" style="border-color:var(--border);color:var(--primary)"><option value="">Select outlet first...</option></select>
+                    <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="staff-passcode-input" placeholder="Your 4-digit passcode" class="w-full p-4 rounded-xl border text-center font-data tracking-[0.3em] font-bold" style="border-color:var(--border)">
+                    <button onclick="staffLogin('retail')" class="w-full btn-grad p-4 rounded-xl font-bold text-lg">Enter</button>
+                    <p class="text-[11px] text-center" style="color:var(--text-muted)">Not on the list, or forgot your passcode? Ask your outlet manager.</p>
                 </div>
-                <div id="ai-passcode-entry" class="hidden flex gap-2">
-                    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="ai-passcode-input" placeholder="3-digit code" class="flex-1 p-4 rounded-xl border text-center font-data tracking-[0.3em] font-bold" style="border-color:var(--border)">
-                    <button onclick="joinAIQuiz()" class="btn-ai px-6 rounded-xl font-bold text-sm">Join</button>
+
+                <div id="staff-options" class="hidden space-y-4">
+                    <div id="staff-welcome" class="text-sm font-bold text-center" style="color:var(--primary)"></div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="setLang('en')" id="lang-en" class="p-3 rounded-xl border-2 font-bold" style="border-color:var(--primary);background:var(--primary);color:white;">English</button>
+                        <button onclick="setLang('ms')" id="lang-ms" class="p-3 rounded-xl border-2 font-bold" style="border-color:var(--border);">Malay</button>
+                    </div>
+                    <select id="staff-topic" onchange="refreshQuizModeInfo()" class="w-full p-4 rounded-xl border bg-white font-bold" style="border-color:var(--border);color:var(--primary)"></select>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="startQuiz()" class="btn-grad p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12l2 2 4-4.5"/></svg>Standard Quiz</button>
+                        <button onclick="revealAIPasscodeEntry()" class="btn-ai p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/><path d="M7.5 15h9"/></svg>AI Practice</button>
+                    </div>
+                    <div id="ai-passcode-entry" class="hidden flex gap-2">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="ai-passcode-input" placeholder="Practice code from manager" class="flex-1 p-4 rounded-xl border text-center font-data tracking-[0.3em] font-bold" style="border-color:var(--border)">
+                        <button onclick="joinAIQuiz()" class="btn-ai px-6 rounded-xl font-bold text-sm">Join</button>
+                    </div>
+                    <p id="quiz-mode-info" class="text-[11px] text-center leading-snug" style="color:var(--text-muted)">Standard uses the official question bank for your topic. AI Practice needs a practice code from your outlet manager — different from your login passcode.</p>
                 </div>
-                <p id="quiz-mode-info" class="text-[11px] text-center leading-snug" style="color:var(--text-muted)">Standard uses the official question bank for your topic. AI Practice needs a code from your outlet manager — pick your outlet, then enter today's code.</p>
+            </div>
+        </div>
+
+        <div id="view-warehouse-staff-login" class="hidden">
+            <div class="glass p-6 md:p-8 rounded-3xl space-y-4">
+                <button onclick="goHome()" class="nav-btn font-bold mb-2" style="color:var(--warehouse)">← Back</button>
+                <h2 class="text-2xl font-bold font-display">Warehouse Staff Login</h2>
+
+                <div id="wh-staff-login-fields" class="space-y-3">
+                    <select id="wh-staff-location" onchange="populateStaffNameOptions('warehouse')" class="w-full p-4 rounded-xl border bg-white" style="border-color:var(--border)">
+                        <option value="">Select location...</option>
+                        <option value="Taskforce">Taskforce</option>
+                        <option value="Warehouse">Warehouse</option>
+                        <option value="Inventory">Inventory</option>
+                        <option value="Logistic">Logistic</option>
+                    </select>
+                    <select id="wh-staff-name-select" class="w-full p-4 rounded-xl border bg-white font-bold" style="border-color:var(--border);color:var(--warehouse)"><option value="">Select location first...</option></select>
+                    <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="wh-staff-passcode-input" placeholder="Your 4-digit passcode" class="w-full p-4 rounded-xl border text-center font-data tracking-[0.3em] font-bold" style="border-color:var(--border)">
+                    <button onclick="staffLogin('warehouse')" class="w-full p-4 rounded-xl font-bold text-lg" style="background:var(--warehouse);color:white;">Enter</button>
+                    <p class="text-[11px] text-center" style="color:var(--text-muted)">Not on the list, or forgot your passcode? Ask your warehouse manager.</p>
+                </div>
+
+                <div id="wh-staff-options" class="hidden space-y-4">
+                    <div id="wh-staff-welcome" class="text-sm font-bold text-center" style="color:var(--warehouse)"></div>
+                    <p class="text-[11px] text-center leading-snug" style="color:var(--text-muted)">Enter the practice code your warehouse manager shared — different from your login passcode above.</p>
+                    <div class="flex gap-2">
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="wh-ai-passcode-input" placeholder="Practice code from manager" class="flex-1 p-4 rounded-xl border text-center font-data tracking-[0.3em] font-bold" style="border-color:var(--border)">
+                        <button onclick="joinAIQuiz()" class="px-6 rounded-xl font-bold text-sm" style="background:var(--warehouse);color:white;">Join</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -298,7 +350,6 @@
                 <button onclick="showManagerRoleSelect()" class="nav-btn font-bold mb-2" style="color:var(--primary)">← Back</button>
                 <h2 class="text-2xl font-bold font-display flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l1-5h14l1 5"/><path d="M4 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M5 9v10h14V9"/><path d="M10 19v-5h4v5"/></svg>Outlet Manager</h2>
                 <select id="outlet-mgr-outlet" class="w-full p-4 rounded-xl border font-bold bg-white" style="border-color:var(--border)"></select>
-                <input type="password" id="outlet-mgr-pass" placeholder="PIN" class="w-full p-4 rounded-xl border text-center font-data" style="border-color:var(--border)">
                 <button onclick="loginOutletManager()" class="w-full btn-grad p-4 rounded-xl font-bold">ENTER DASHBOARD</button>
             </div>
         </div>
@@ -313,6 +364,18 @@
                     <button onclick="location.reload()" class="nav-btn font-bold text-sm" style="color:var(--danger)">Logout</button>
                 </div>
 
+                <div class="p-4 rounded-2xl space-y-3 border" style="background:var(--primary-soft);border-color:var(--primary)">
+                    <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--primary-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M2 19c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/><path d="M17 8v4"/><path d="M15 10h4"/></svg>Manage Staff</p>
+                    <p class="text-[11px]" style="color:var(--text-muted)">Add staff here so they can log in — each person picks their own name and enters this passcode to access Standard Quiz, AI Practice, and Resources. Remove someone the moment they leave and their access ends immediately.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="new-staff-name-retail" placeholder="Staff name" class="p-3 rounded-lg border text-sm" style="border-color:var(--border)">
+                        <input type="text" id="new-staff-idnote-retail" placeholder="ID/Note (optional)" class="p-3 rounded-lg border text-sm" style="border-color:var(--border)">
+                    </div>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="new-staff-passcode-retail" placeholder="Set their 4-digit passcode" class="w-full p-3 rounded-lg border text-sm font-data text-center" style="border-color:var(--border)">
+                    <button onclick="addStaffToRoster('retail')" class="w-full btn-grad p-3 rounded-lg font-bold text-sm">Add Staff</button>
+                    <div id="staff-roster-list-retail" class="space-y-2 max-h-64 overflow-y-auto pt-2 border-t" style="border-color:var(--primary)"></div>
+                </div>
+
                 <div class="p-4 rounded-2xl space-y-2 border" style="background:var(--accent-soft);border-color:var(--accent)">
                     <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/></svg>Create AI Practice Quiz</p>
                     <p class="text-[11px]" style="color:var(--text-muted)">Pick a resource from your Knowledge Base, choose how many questions, generate — then share the code with your team.</p>
@@ -322,22 +385,88 @@
                         <input type="number" id="quiz-source-count" min="1" max="25" value="10" class="w-20 p-2 rounded-lg border text-center text-sm font-data" style="border-color:var(--border)">
                     </div>
                     <textarea id="quiz-source-notes" placeholder="Anything specific to emphasize? (optional)" class="w-full p-3 rounded-lg border h-16 text-sm" style="border-color:var(--border)"></textarea>
-                    <button onclick="createAIQuiz()" class="w-full btn-ai p-3 rounded-lg font-bold text-sm">Generate Quiz</button>
+                    <button onclick="createAIQuiz('retail')" class="w-full btn-ai p-3 rounded-lg font-bold text-sm">Generate Quiz</button>
                     <div id="quiz-passcode-display" class="hidden mt-2 p-4 rounded-xl text-center" style="background:var(--surface);border:2px dashed var(--accent-dark)">
                         <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Share this code with your team</p>
                         <p id="quiz-passcode-value" class="text-4xl font-bold font-data tracking-widest" style="color:var(--accent-dark)"></p>
                         <p id="quiz-passcode-meta" class="text-[11px]" style="color:var(--text-muted)"></p>
                         <p id="quiz-passcode-timer" class="text-xs font-bold font-data mt-1"></p>
-                        <button onclick="endActiveQuizEarly()" class="mt-3 text-xs font-bold px-4 rounded-lg min-h-[40px]" style="background:var(--danger-soft);color:var(--danger-dark)">End This Code Now</button>
+                        <button onclick="endActiveQuizEarly('retail')" class="mt-3 text-xs font-bold px-4 rounded-lg min-h-[40px]" style="background:var(--danger-soft);color:var(--danger-dark)">End This Code Now</button>
                     </div>
                 </div>
 
                 <div>
                     <div class="flex justify-between items-center mb-3">
                         <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--primary)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>AI Practice Monitor</p>
-                        <select id="ai-monitor-topic-filter" onchange="renderAIResultsForOutlet()" class="p-2 text-[10px] border rounded-lg bg-white font-bold" style="border-color:var(--border)"></select>
+                        <select id="ai-monitor-topic-filter" onchange="renderAIResultsForOutlet('retail')" class="p-2 text-[10px] border rounded-lg bg-white font-bold" style="border-color:var(--border)"></select>
                     </div>
                     <div id="ai-monitor-list" class="space-y-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-warehouse-mgr-login" class="hidden">
+            <div class="glass p-8 rounded-3xl max-w-md mx-auto space-y-4 text-center">
+                <button onclick="goHome()" class="nav-btn font-bold mb-2" style="color:var(--accent-dark)">← Back</button>
+                <h2 class="text-2xl font-bold font-display flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5l9-4 9 4-9 4-9-4z"/><path d="M3 7.5v9l9 4 9-4v-9"/><path d="M12 11.5v9"/></svg>Warehouse Manager</h2>
+                <select id="wh-mgr-location" class="w-full p-4 rounded-xl border font-bold bg-white" style="border-color:var(--border)">
+                    <option value="">Select location...</option>
+                    <option value="Taskforce">Taskforce</option>
+                    <option value="Warehouse">Warehouse</option>
+                    <option value="Inventory">Inventory</option>
+                    <option value="Logistic">Logistic</option>
+                </select>
+                <button onclick="loginWarehouseManager()" class="w-full p-4 rounded-xl font-bold" style="background:var(--accent-dark);color:white;">ENTER DASHBOARD</button>
+            </div>
+        </div>
+
+        <div id="view-warehouse-mgr-dash" class="hidden">
+            <div class="glass p-6 rounded-3xl space-y-6">
+                <div class="flex justify-between items-center border-b pb-4" style="border-color:var(--border)">
+                    <div>
+                        <p class="text-[10px] font-bold uppercase" style="color:var(--text-muted)">Warehouse Manager</p>
+                        <p id="disp-wh-mgr-location" class="text-xl font-bold font-data" style="color:var(--accent-dark)"></p>
+                    </div>
+                    <button onclick="location.reload()" class="nav-btn font-bold text-sm" style="color:var(--danger)">Logout</button>
+                </div>
+
+                <div class="p-4 rounded-2xl space-y-3 border" style="background:var(--warehouse-soft);border-color:var(--warehouse)">
+                    <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--warehouse)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M2 19c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/><path d="M17 8v4"/><path d="M15 10h4"/></svg>Manage Staff</p>
+                    <p class="text-[11px]" style="color:var(--text-muted)">Add staff here so they can log in — each person picks their own name and enters this passcode to access AI Practice and Resources. Remove someone the moment they leave and their access ends immediately.</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="new-staff-name-warehouse" placeholder="Staff name" class="p-3 rounded-lg border text-sm" style="border-color:var(--border)">
+                        <input type="text" id="new-staff-idnote-warehouse" placeholder="ID/Note (optional)" class="p-3 rounded-lg border text-sm" style="border-color:var(--border)">
+                    </div>
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="new-staff-passcode-warehouse" placeholder="Set their 4-digit passcode" class="w-full p-3 rounded-lg border text-sm font-data text-center" style="border-color:var(--border)">
+                    <button onclick="addStaffToRoster('warehouse')" class="w-full p-3 rounded-lg font-bold text-sm" style="background:var(--warehouse);color:white;">Add Staff</button>
+                    <div id="staff-roster-list-warehouse" class="space-y-2 max-h-64 overflow-y-auto pt-2 border-t" style="border-color:var(--warehouse)"></div>
+                </div>
+
+                <div class="p-4 rounded-2xl space-y-2 border" style="background:var(--accent-soft);border-color:var(--accent)">
+                    <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/></svg>Create AI Practice Quiz</p>
+                    <p class="text-[11px]" style="color:var(--text-muted)">Pick a warehouse resource, choose how many questions, generate — then share the code with your team.</p>
+                    <select id="wh-quiz-source-select" class="w-full p-3 rounded-lg border bg-white text-sm" style="border-color:var(--border)"></select>
+                    <div class="flex gap-2 items-center">
+                        <span class="text-[11px] font-bold flex-shrink-0" style="color:var(--accent-dark)">Questions:</span>
+                        <input type="number" id="wh-quiz-source-count" min="1" max="25" value="10" class="w-20 p-2 rounded-lg border text-center text-sm font-data" style="border-color:var(--border)">
+                    </div>
+                    <textarea id="wh-quiz-source-notes" placeholder="Anything specific to emphasize? (optional)" class="w-full p-3 rounded-lg border h-16 text-sm" style="border-color:var(--border)"></textarea>
+                    <button onclick="createAIQuiz('warehouse')" class="w-full p-3 rounded-lg font-bold text-sm" style="background:var(--accent-dark);color:white;">Generate Quiz</button>
+                    <div id="wh-quiz-passcode-display" class="hidden mt-2 p-4 rounded-xl text-center" style="background:var(--surface);border:2px dashed var(--accent-dark)">
+                        <p class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--text-muted)">Share this code with your team</p>
+                        <p id="wh-quiz-passcode-value" class="text-4xl font-bold font-data tracking-widest" style="color:var(--accent-dark)"></p>
+                        <p id="wh-quiz-passcode-meta" class="text-[11px]" style="color:var(--text-muted)"></p>
+                        <p id="wh-quiz-passcode-timer" class="text-xs font-bold font-data mt-1"></p>
+                        <button onclick="endActiveQuizEarly('warehouse')" class="mt-3 text-xs font-bold px-4 rounded-lg min-h-[40px]" style="background:var(--danger-soft);color:var(--danger-dark)">End This Code Now</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--warehouse)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>AI Practice Monitor</p>
+                        <select id="wh-ai-monitor-topic-filter" onchange="renderAIResultsForOutlet('warehouse')" class="p-2 text-[10px] border rounded-lg bg-white font-bold" style="border-color:var(--border)"></select>
+                    </div>
+                    <div id="wh-ai-monitor-list" class="space-y-2"></div>
                 </div>
             </div>
         </div>
@@ -445,7 +574,6 @@
                 <h2 class="text-2xl font-bold font-display flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Area Manager</h2>
                 <select id="mgr-select" onchange="updateMgrOutlets()" class="w-full p-4 rounded-xl border font-bold bg-white" style="border-color:var(--border)"></select>
                 <select id="mgr-outlet" class="w-full p-4 rounded-xl border font-bold bg-white" style="border-color:var(--border)"></select>
-                <input type="password" id="mgr-pass" placeholder="Pin Code" class="w-full p-4 rounded-xl border text-center font-data" style="border-color:var(--border)">
                 <button onclick="loginManager()" class="w-full btn-grad p-4 rounded-xl font-bold">ENTER DASHBOARD</button>
             </div>
         </div>
@@ -477,6 +605,12 @@
         let currentLang = 'en', quizIdx = 0, score = 0, currentQuizData = [], staffWrongs = [];
         let isQuizRunning = false, isAIQuiz = false, currentOutletMgrOutlet = '', joinedPasscode = '', isEditingReport = false;
         let unlockedSupervisorPin = '';
+        // v1.21: session identity set once a staff member (Retail or Warehouse)
+        // successfully logs in via the roster passcode check. Everything that
+        // used to read a free-text name field now reads these instead.
+        let loggedInStaffName = '', loggedInStaffOutlet = '', loggedInDivision = '';
+        let currentWarehouseMgrLocation = '';
+        let allStaffRoster = [];
 
         const outletList = ["AJ", "B6", "BB", "BJR", "BP", "CDR", "CK", "DG", "DGD", "GB", "GBD", "GM", "HL", "HQ", "HQCT", "JL", "JLD", "JTH", "KB", "KBKK", "KBKS", "KBTJ", "KKR", "KL", "KMD", "KMN", "KMSK", "KS", "MC", "MCD", "MLR", "MR", "PC", "PDM", "PK", "PM", "PP", "PPK", "PSPD", "PT", "RJ", "SLS", "SMR", "ST", "TM", "TMD", "TMT", "TPOH", "TPT", "WM"];
         const managerData = [
@@ -507,6 +641,7 @@
                 allAIResults = dataRaw.aiResults || [];
                 allAIWrongAnswers = dataRaw.aiWrongAnswers || [];
                 allReferenceDocs = dataRaw.referenceDocs || [];
+                allStaffRoster = dataRaw.staffRoster || [];
                 
                 const liveRes = dataRaw.results || [];
                 const archRes = dataRaw.archiveResults || [];
@@ -548,11 +683,13 @@
             showView('view-main');
         }
 
-        function promptManagerCategory() {
+        let managerCategoryPin = '';
+        function promptManagerCategory(cat) {
             const pin = prompt("Enter Manager access PIN:");
             if (pin === null) return;
             if (pin !== "FLT2026") return alert("That PIN doesn't look right.");
-            selectCategory('manager');
+            managerCategoryPin = pin;
+            selectCategory(cat);
         }
 
         function applyCategoryVisibility() {
@@ -563,7 +700,16 @@
             });
         }
 
-        function goHome() { isQuizRunning = false; applyCategoryVisibility(); showView('view-main'); }
+        function goHome() {
+            isQuizRunning = false;
+            loggedInStaffName = ''; loggedInStaffOutlet = ''; loggedInDivision = '';
+            document.getElementById('staff-login-fields').classList.remove('hidden');
+            document.getElementById('staff-options').classList.add('hidden');
+            document.getElementById('wh-staff-login-fields').classList.remove('hidden');
+            document.getElementById('wh-staff-options').classList.add('hidden');
+            applyCategoryVisibility();
+            showView('view-main');
+        }
         function showManagerRoleSelect() { showView('view-manager-role-select'); }
 
         function openResources() {
@@ -640,7 +786,7 @@
         }
 
         async function saveQuizResult() {
-            const p = { action: 'save_result', name: document.getElementById('staff-name').value.toUpperCase().trim(), outlet: document.getElementById('staff-outlet').value, topic: document.getElementById('staff-topic').value, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs };
+            const p = { action: 'save_result', name: loggedInStaffName, outlet: loggedInStaffOutlet, topic: document.getElementById('staff-topic').value, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs };
             const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
             if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
             else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
@@ -650,12 +796,12 @@
 
         async function saveAIQuizResult() {
             const attemptId = 'AI' + Date.now();
-            const topic = (currentQuizData[0] && currentQuizData[0].topic) || document.getElementById('staff-topic').value || 'General';
-            const p = { action: 'save_ai_result', attemptId, name: document.getElementById('staff-name').value.toUpperCase().trim(), outlet: document.getElementById('staff-outlet').value, topic, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs, passcode: joinedPasscode };
+            const topic = (currentQuizData[0] && currentQuizData[0].topic) || (loggedInDivision === 'warehouse' ? 'Warehouse Practice' : document.getElementById('staff-topic').value) || 'General';
+            const p = { action: 'save_ai_result', attemptId, name: loggedInStaffName, outlet: loggedInStaffOutlet, topic, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs, passcode: joinedPasscode };
             const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
             if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
             else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
-            alert("Practice attempt shared with your outlet manager.");
+            alert("Practice attempt shared with your manager.");
             location.reload();
         }
 
@@ -722,41 +868,59 @@
 
         function loginOutletManager() {
             const outlet = document.getElementById('outlet-mgr-outlet').value;
-            const pin = document.getElementById('outlet-mgr-pass').value;
             if(!outlet) return alert("Please select your outlet.");
-            if(pin !== "1234") return alert("That PIN doesn't look right.");
             currentOutletMgrOutlet = outlet;
             document.getElementById('disp-outlet-mgr-code').innerText = outlet;
-            populateOutletMgrDropdowns();
-            loadActiveQuizForOutlet();
-            renderAIResultsForOutlet();
+            populateOutletMgrDropdowns('retail');
+            loadActiveQuizForOutlet('retail');
+            renderAIResultsForOutlet('retail');
+            renderStaffRosterList('retail', outlet);
             showView('view-outlet-mgr-dash');
         }
 
-        async function loadActiveQuizForOutlet() {
-            document.getElementById('quiz-passcode-display').classList.add('hidden');
+        function loginWarehouseManager() {
+            const location = document.getElementById('wh-mgr-location').value;
+            if(!location) return alert("Please select a location.");
+            currentWarehouseMgrLocation = location;
+            document.getElementById('disp-wh-mgr-location').innerText = location;
+            populateOutletMgrDropdowns('warehouse');
+            loadActiveQuizForOutlet('warehouse');
+            renderAIResultsForOutlet('warehouse');
+            renderStaffRosterList('warehouse', location);
+            showView('view-warehouse-mgr-dash');
+        }
+
+        async function loadActiveQuizForOutlet(scope) {
+            scope = scope || 'retail';
+            const prefix = scope === 'warehouse' ? 'wh-' : '';
+            const outlet = scope === 'warehouse' ? currentWarehouseMgrLocation : currentOutletMgrOutlet;
+            document.getElementById(prefix + 'quiz-passcode-display').classList.add('hidden');
             if(quizTimerInterval) clearInterval(quizTimerInterval);
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'get_outlet_active_quiz', outlet: currentOutletMgrOutlet })
+                    body: JSON.stringify({ action: 'get_outlet_active_quiz', outlet })
                 });
                 const data = await res.json();
-                if(data.active && data.passcode) showPasscodeDisplay(data.passcode, data.topic, data.count, data.createdAt);
+                if(data.active && data.passcode) showPasscodeDisplay(data.passcode, data.topic, data.count, data.createdAt, scope);
             } catch(e) { /* no active code to show — fine, stays hidden */ }
         }
 
-        function showPasscodeDisplay(passcode, topic, count, createdAtISO) {
-            document.getElementById('quiz-passcode-value').innerText = passcode;
-            document.getElementById('quiz-passcode-meta').innerText = `${count} question(s) · "${topic}"`;
-            document.getElementById('quiz-passcode-display').classList.remove('hidden');
-            startPasscodeCountdown(createdAtISO);
+        function showPasscodeDisplay(passcode, topic, count, createdAtISO, scope) {
+            scope = scope || 'retail';
+            const prefix = scope === 'warehouse' ? 'wh-' : '';
+            document.getElementById(prefix + 'quiz-passcode-value').innerText = passcode;
+            document.getElementById(prefix + 'quiz-passcode-meta').innerText = `${count} question(s) · "${topic}"`;
+            document.getElementById(prefix + 'quiz-passcode-display').classList.remove('hidden');
+            startPasscodeCountdown(createdAtISO, scope);
         }
 
-        function startPasscodeCountdown(createdAtISO) {
+        function startPasscodeCountdown(createdAtISO, scope) {
+            scope = scope || 'retail';
+            const prefix = scope === 'warehouse' ? 'wh-' : '';
             if(quizTimerInterval) clearInterval(quizTimerInterval);
             const expiresAt = new Date(createdAtISO).getTime() + 60 * 60 * 1000;
-            const timerEl = document.getElementById('quiz-passcode-timer');
+            const timerEl = document.getElementById(prefix + 'quiz-passcode-timer');
             function tick() {
                 const remaining = expiresAt - Date.now();
                 if(remaining <= 0) {
@@ -774,37 +938,47 @@
             quizTimerInterval = setInterval(tick, 1000);
         }
 
-        async function endActiveQuizEarly() {
+        async function endActiveQuizEarly(scope) {
+            scope = scope || 'retail';
+            const prefix = scope === 'warehouse' ? 'wh-' : '';
+            const outlet = scope === 'warehouse' ? currentWarehouseMgrLocation : currentOutletMgrOutlet;
             if(!confirm("End this code now? Staff won't be able to join with it anymore, even though it hasn't expired yet.")) return;
             setLoader(true, "Ending code...");
             try {
                 await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'end_ai_quiz', outlet: currentOutletMgrOutlet })
+                    body: JSON.stringify({ action: 'end_ai_quiz', outlet })
                 });
             } catch(e) { /* best-effort — clear the UI regardless below */ }
             if(quizTimerInterval) clearInterval(quizTimerInterval);
-            document.getElementById('quiz-passcode-display').classList.add('hidden');
+            document.getElementById(prefix + 'quiz-passcode-display').classList.add('hidden');
             setLoader(false);
         }
 
-        function populateOutletMgrDropdowns() {
+        function populateOutletMgrDropdowns(scope) {
+            scope = scope || 'retail';
+            const prefix = scope === 'warehouse' ? 'wh-' : '';
+            const outlet = scope === 'warehouse' ? currentWarehouseMgrLocation : currentOutletMgrOutlet;
+
             // The monitor filter is built from topics that actually appear in this
             // outlet's AI attempts — this naturally includes resource-derived labels
             // (e.g. a quiz generated from a specific SOP).
             const outletAITopics = [...new Set(allAIResults
-                .filter(r => (r.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase())
+                .filter(r => (r.Outlet||"").toString().trim().toUpperCase() === outlet.toUpperCase())
                 .map(r => (r.Topic||"").toString().trim())
             )].filter(Boolean).sort();
-            document.getElementById('ai-monitor-topic-filter').innerHTML = '<option value="ALL">All topics & resources</option>' + outletAITopics.map(t => `<option value="${t}">${t}</option>`).join('');
+            document.getElementById(prefix + 'ai-monitor-topic-filter').innerHTML = '<option value="ALL">All topics & resources</option>' + outletAITopics.map(t => `<option value="${t}">${t}</option>`).join('');
 
             // Quiz source is resources only — "standard topics" aren't a reliable
             // source since a topic string on a quiz question has no guaranteed
-            // content behind it. Grouped the same way as the Resources page,
-            // minus Halal Certificate — certification documents aren't meant to
-            // be quizzed on, so that section is deliberately left out here even
-            // though it's still fully visible on the Resources page itself.
-            const sections = [
+            // content behind it. Retail sees everything except Halal Certificate
+            // (certification documents aren't meant to be quizzed on). Warehouse
+            // Manager only sees the two warehouse-relevant sections — a warehouse
+            // quiz shouldn't be generated from retail SOPs.
+            const sections = scope === 'warehouse' ? [
+                { label: 'Warehousing Handbook', matchContent: () => false },
+                { label: 'eLearning Courses', matchContent: () => false }
+            ] : [
                 { label: '101 Guide to Retailing', matchContent: c => (c.Category||'') === 'SOP' },
                 { label: 'Housebrand Modules', matchContent: c => (c.Category||'') === 'Training Material' },
                 { label: 'General Policies', matchContent: c => (c.Category||'') === 'Note' || (c.Category||'') === 'Guideline' },
@@ -817,40 +991,46 @@
                 const opts = [...contentOpts, ...docOpts].join('');
                 return opts ? `<optgroup label="${sec.label}">${opts}</optgroup>` : '';
             }).join('');
-            document.getElementById('quiz-source-select').innerHTML = '<option value="">Select a resource...</option>' + optgroups;
+            document.getElementById(prefix + 'quiz-source-select').innerHTML = '<option value="">Select a resource...</option>' + optgroups;
         }
 
-        async function createAIQuiz() {
-            const raw = document.getElementById('quiz-source-select').value;
+        async function createAIQuiz(scope) {
+            scope = scope || 'retail';
+            const prefix = scope === 'warehouse' ? 'wh-' : '';
+            const outlet = scope === 'warehouse' ? currentWarehouseMgrLocation : currentOutletMgrOutlet;
+            const raw = document.getElementById(prefix + 'quiz-source-select').value;
             if(!raw) return alert("Please choose a resource first.");
             const [sourceType, ...rest] = raw.split(':');
             const sourceValue = rest.join(':');
-            const topicLabel = document.getElementById('quiz-source-select').selectedOptions[0].innerText;
-            const count = parseInt(document.getElementById('quiz-source-count').value) || 10;
-            const extraNotes = document.getElementById('quiz-source-notes').value.trim();
-            const manager = 'Outlet Manager - ' + currentOutletMgrOutlet;
+            const topicLabel = document.getElementById(prefix + 'quiz-source-select').selectedOptions[0].innerText;
+            const count = parseInt(document.getElementById(prefix + 'quiz-source-count').value) || 10;
+            const extraNotes = document.getElementById(prefix + 'quiz-source-notes').value.trim();
+            const manager = (scope === 'warehouse' ? 'Warehouse Manager - ' : 'Outlet Manager - ') + outlet;
 
             setLoader(true, "Generating quiz...");
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'create_ai_quiz', outlet: currentOutletMgrOutlet, sourceType, sourceValue, topicLabel, count, extraNotes, manager })
+                    body: JSON.stringify({ action: 'create_ai_quiz', outlet, sourceType, sourceValue, topicLabel, count, extraNotes, manager })
                 });
                 const data = await res.json();
                 if(data.error) throw new Error(data.error);
                 if(!data.passcode) throw new Error("Server didn't return a passcode.");
-                showPasscodeDisplay(data.passcode, data.topic, data.count, data.createdAt);
+                showPasscodeDisplay(data.passcode, data.topic, data.count, data.createdAt, scope);
             } catch(e) {
                 alert("Couldn't generate the quiz: " + e.message);
             }
             setLoader(false);
         }
 
-        function renderAIResultsForOutlet() {
-            const f = document.getElementById('ai-monitor-topic-filter').value || 'ALL';
-            const list = document.getElementById('ai-monitor-list');
-            const rows = allAIResults.filter(r => (r.Outlet||"").toString().trim().toUpperCase() === currentOutletMgrOutlet.toUpperCase() && (f === 'ALL' || (r.Topic||"").toString().trim() === f));
-            if(!rows.length) { list.innerHTML = '<p class="text-center text-sm py-6" style="color:var(--text-muted)">No AI practice attempts yet for this outlet.</p>'; return; }
+        function renderAIResultsForOutlet(scope) {
+            scope = scope || 'retail';
+            const prefix = scope === 'warehouse' ? 'wh-' : '';
+            const outlet = scope === 'warehouse' ? currentWarehouseMgrLocation : currentOutletMgrOutlet;
+            const f = document.getElementById(prefix + 'ai-monitor-topic-filter').value || 'ALL';
+            const list = document.getElementById(prefix + 'ai-monitor-list');
+            const rows = allAIResults.filter(r => (r.Outlet||"").toString().trim().toUpperCase() === outlet.toUpperCase() && (f === 'ALL' || (r.Topic||"").toString().trim() === f));
+            if(!rows.length) { list.innerHTML = '<p class="text-center text-sm py-6" style="color:var(--text-muted)">No AI practice attempts yet.</p>'; return; }
 
             // Group every attempt under its topic (or resource-derived label) so
             // all staff who took the same quiz show up together.
@@ -1036,7 +1216,10 @@
                         <span class="badge" style="background:var(--accent-soft);color:var(--accent-dark)">${d.Kind}</span>
                         <p class="font-bold mt-1 truncate">${d.Name}</p>
                     </div>
-                    <button onclick="openReaderForDoc('${d.ID}')" class="flex-shrink-0 text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="openReaderForDoc('${d.ID}')" class="text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
+                        <a href="${d.DownloadURL}" target="_blank" class="text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border)">Download</a>
+                    </div>
                 </div>`;
         }
 
@@ -1106,15 +1289,150 @@
         }
 
         function validateStaffEntry() {
-            const n = document.getElementById('staff-name').value, t = document.getElementById('staff-topic').value, o = document.getElementById('staff-outlet').value;
-            if(!n || !t || !o) { alert("Please fill in all fields."); return null; }
-            return { n, t, o };
+            const t = document.getElementById('staff-topic').value; 
+            if(!loggedInStaffName || !loggedInStaffOutlet) { alert("Please log in first."); return null; }
+            if(!t) { alert("Please pick a topic."); return null; }
+            return { n: loggedInStaffName, t, o: loggedInStaffOutlet };
         }
 
         function validateStaffNameOutlet() {
-            const n = document.getElementById('staff-name').value, o = document.getElementById('staff-outlet').value;
-            if(!n || !o) { alert("Enter your name and outlet first."); return null; }
-            return { n, o };
+            if(!loggedInStaffName || !loggedInStaffOutlet) { alert("Please log in first."); return null; }
+            return { n: loggedInStaffName, o: loggedInStaffOutlet };
+        }
+
+        // v1.21: staff roster login — outlet/location + name (picked, not
+        // typed) + a permanent passcode the manager set in "Manage Staff".
+        // Names are already loaded (fetchData), passcode check happens
+        // server-side so it's never exposed to the browser either direction.
+        function populateStaffNameOptions(division) {
+            const outletFieldId = division === 'warehouse' ? 'wh-staff-location' : 'staff-outlet';
+            const nameFieldId = division === 'warehouse' ? 'wh-staff-name-select' : 'staff-name-select';
+            const outlet = document.getElementById(outletFieldId).value;
+            const nameSelect = document.getElementById(nameFieldId);
+            if(!outlet) { nameSelect.innerHTML = '<option value="">Select outlet first...</option>'; return; }
+            const names = allStaffRoster.filter(r => 
+                (r.Division||'').toString().trim().toLowerCase() === division && 
+                (r.Outlet||'').toString().trim().toUpperCase() === outlet.toUpperCase()
+            );
+            nameSelect.innerHTML = names.length 
+                ? '<option value="">Select your name...</option>' + names.map(r => `<option value="${r.Name}">${r.Name}${r.IDNote ? ' (' + r.IDNote + ')' : ''}</option>`).join('')
+                : '<option value="">No staff added for this outlet yet — ask your manager</option>';
+        }
+
+        async function staffLogin(division) {
+            const outletFieldId = division === 'warehouse' ? 'wh-staff-location' : 'staff-outlet';
+            const nameFieldId = division === 'warehouse' ? 'wh-staff-name-select' : 'staff-name-select';
+            const passFieldId = division === 'warehouse' ? 'wh-staff-passcode-input' : 'staff-passcode-input';
+            const outlet = document.getElementById(outletFieldId).value;
+            const name = document.getElementById(nameFieldId).value;
+            const passcode = document.getElementById(passFieldId).value.trim();
+            if(!outlet || !name) return alert("Select your outlet and name first.");
+            if(!/^\d{4}$/.test(passcode)) return alert("Enter your 4-digit passcode.");
+
+            setLoader(true, "Checking passcode...");
+            let ok = false, alreadyShownError = false;
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'verify_staff_login', division, outlet, name, passcode })
+                });
+                const data = await res.json();
+                if(data.error) { alert(data.error); alreadyShownError = true; }
+                ok = !!data.authorized;
+            } catch(e) {
+                alert("Couldn't reach the server — check your connection and try again.");
+                alreadyShownError = true;
+            }
+            setLoader(false);
+            if(!ok) {
+                if(!alreadyShownError) alert("That name/passcode combination doesn't look right.");
+                return;
+            }
+
+            loggedInStaffName = name; loggedInStaffOutlet = outlet; loggedInDivision = division;
+
+            if(division === 'warehouse') {
+                document.getElementById('wh-staff-login-fields').classList.add('hidden');
+                document.getElementById('wh-staff-options').classList.remove('hidden');
+                document.getElementById('wh-staff-welcome').innerText = `Welcome, ${name}!`;
+            } else {
+                document.getElementById('staff-login-fields').classList.add('hidden');
+                document.getElementById('staff-options').classList.remove('hidden');
+                document.getElementById('staff-welcome').innerText = `Welcome, ${name}!`;
+            }
+        }
+
+        // Manage Staff — shared between Outlet Manager (retail) and Warehouse
+        // Manager. Passcodes are only ever fetched here, gated server-side by
+        // the same PIN entered at the Manager-category screen.
+        async function renderStaffRosterList(division, outlet) {
+            const listId = division === 'warehouse' ? 'staff-roster-list-warehouse' : 'staff-roster-list-retail';
+            const list = document.getElementById(listId);
+            if(!list) return;
+            list.innerHTML = '<p class="text-xs text-center py-2" style="color:var(--text-muted)">Loading...</p>';
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'get_staff_roster_full', division, outlet, pin: managerCategoryPin })
+                });
+                const data = await res.json();
+                if(!data.authorized) { list.innerHTML = `<p class="text-xs text-center py-2" style="color:var(--danger-dark)">${data.error || 'Could not load roster.'}</p>`; return; }
+                if(!data.staff || !data.staff.length) { list.innerHTML = '<p class="text-xs text-center py-2" style="color:var(--text-muted)">No staff added yet.</p>'; return; }
+                list.innerHTML = data.staff.map(s => `
+                    <div class="flex justify-between items-center p-2.5 rounded-lg border text-sm" style="border-color:var(--border)">
+                        <div class="min-w-0">
+                            <p class="font-bold truncate">${s.Name}${s.IDNote ? ` <span class="text-xs font-normal" style="color:var(--text-muted)">(${s.IDNote})</span>` : ''}</p>
+                            <p class="text-xs font-data" style="color:var(--text-muted)">Passcode: ${s.Passcode}</p>
+                        </div>
+                        <button onclick="removeStaffFromRoster('${division}', '${outlet.replace(/'/g,"\\'")}', '${s.Name.replace(/'/g,"\\'")}')" class="flex-shrink-0 text-xs font-bold px-3 rounded-lg min-h-[36px]" style="background:var(--danger-soft);color:var(--danger-dark)">Remove</button>
+                    </div>`).join('');
+            } catch(e) {
+                list.innerHTML = '<p class="text-xs text-center py-2" style="color:var(--danger-dark)">Couldn\'t reach the server.</p>';
+            }
+        }
+
+        async function addStaffToRoster(division) {
+            const suffix = division === 'warehouse' ? 'warehouse' : 'retail';
+            const outlet = division === 'warehouse' ? currentWarehouseMgrLocation : currentOutletMgrOutlet;
+            const name = document.getElementById(`new-staff-name-${suffix}`).value.trim();
+            const idNote = document.getElementById(`new-staff-idnote-${suffix}`).value.trim();
+            const passcode = document.getElementById(`new-staff-passcode-${suffix}`).value.trim();
+            if(!name) return alert("Enter the staff member's name.");
+            if(!/^\d{4}$/.test(passcode)) return alert("Passcode must be exactly 4 digits.");
+
+            setLoader(true, "Adding...");
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'add_staff', division, outlet, name, idNote, passcode, addedBy: (division === 'warehouse' ? 'Warehouse Manager - ' : 'Outlet Manager - ') + outlet, pin: managerCategoryPin })
+                });
+                const data = await res.json();
+                if(data.status !== 'ok') { setLoader(false); return alert(data.error || "Couldn't add that staff member."); }
+                document.getElementById(`new-staff-name-${suffix}`).value = '';
+                document.getElementById(`new-staff-idnote-${suffix}`).value = '';
+                document.getElementById(`new-staff-passcode-${suffix}`).value = '';
+                await renderStaffRosterList(division, outlet);
+            } catch(e) {
+                alert("Couldn't reach the server — check your connection and try again.");
+            }
+            setLoader(false);
+        }
+
+        async function removeStaffFromRoster(division, outlet, name) {
+            if(!confirm(`Remove ${name} from the staff list? They won't be able to log in anymore.`)) return;
+            setLoader(true, "Removing...");
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'remove_staff', division, outlet, name, pin: managerCategoryPin })
+                });
+                const data = await res.json();
+                if(data.status !== 'ok') { setLoader(false); return alert(data.error || "Couldn't remove that staff member."); }
+                await renderStaffRosterList(division, outlet);
+            } catch(e) {
+                alert("Couldn't reach the server — check your connection and try again.");
+            }
+            setLoader(false);
         }
 
         // v1.12: one attempt per quiz per calendar day, to close the loophole
@@ -1183,8 +1501,9 @@
         async function joinAIQuiz() {
             const entry = validateStaffNameOutlet();
             if(!entry) return;
-            const passcode = document.getElementById('ai-passcode-input').value.trim();
-            if(!/^\d{3}$/.test(passcode)) return alert("Enter the 3-digit code your outlet manager shared.");
+            const passInputId = loggedInDivision === 'warehouse' ? 'wh-ai-passcode-input' : 'ai-passcode-input';
+            const passcode = document.getElementById(passInputId).value.trim();
+            if(!/^\d{3}$/.test(passcode)) return alert("Enter the 3-digit practice code your manager shared.");
 
             setLoader(true, "Joining quiz...");
             try {
@@ -1197,7 +1516,7 @@
 
                 if(hasAttemptedAIToday(entry.n, entry.o, data.passcode)) {
                     setLoader(false);
-                    return alert("You've already completed this practice code today. Ask your outlet manager for a new one if you'd like more practice.");
+                    return alert("You've already completed this practice code today. Ask your manager for a new one if you'd like more practice.");
                 }
 
                 currentQuizData = data.questions;
@@ -1210,7 +1529,7 @@
                 renderQuestion();
                 showView('view-quiz');
             } catch(e) {
-                alert(e.message === "empty" ? "That code didn't match an active quiz for your outlet. Double-check with your outlet manager." : e.message);
+                alert(e.message === "empty" ? "That code didn't match an active quiz for your outlet. Double-check with your manager." : e.message);
             }
             setLoader(false);
         }
@@ -1346,9 +1665,8 @@
             setTimeout(renderSupervisorStats, 200);
         }
         function loginManager() {
-            const id = document.getElementById('mgr-select').value, o = document.getElementById('mgr-outlet').value, pin = document.getElementById('mgr-pass').value;
+            const id = document.getElementById('mgr-select').value, o = document.getElementById('mgr-outlet').value;
             if(!id || !o) return alert("Please select your name and outlet.");
-            if(pin !== "1234") return alert("That PIN doesn't look right.");
             const m = managerData.find(x => x.id === id);
             if (m && m.outlets.includes(o)) {
                 document.getElementById('disp-mgr-name').innerText = id;
@@ -1442,7 +1760,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.20.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.21.csv`; l.click();
         }
     </script>
 </body>
