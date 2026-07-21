@@ -124,7 +124,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.22</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.23</span></p>
             </header>
             <p class="text-center font-bold mb-5" style="color:var(--text-muted)">Which team are you with?</p>
             <div class="space-y-4 max-w-md mx-auto">
@@ -160,7 +160,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.22</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.23</span></p>
                 <button onclick="showView('view-category-select')" class="text-xs font-bold mt-2 underline" style="color:var(--text-muted)">Switch category</button>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
@@ -337,6 +337,7 @@
                         <p class="text-xs font-black uppercase tracking-widest flex items-center gap-1.5" style="color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.2L15.8 5a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.2 19 4 20z"/><path d="M14 6.5l3.5 3.5"/></svg>Add / Manage Resources</p>
                         <button onclick="document.getElementById('resource-manager-panel').classList.add('hidden')" class="text-sm font-bold min-h-[40px] px-2" style="color:var(--accent-dark)">✕ Close</button>
                     </div>
+                    <p id="resource-sync-stats" class="text-[11px] font-data" style="color:var(--text-muted)"></p>
                     <div class="grid grid-cols-2 gap-3">
                         <select id="kb-category" class="p-3 rounded-xl border bg-white font-bold text-sm" style="border-color:var(--border)">
                             <option value="SOP">101 Guide to Retailing</option>
@@ -654,6 +655,10 @@
                 allAIWrongAnswers = dataRaw.aiWrongAnswers || [];
                 allReferenceDocs = dataRaw.referenceDocs || [];
                 allStaffRoster = dataRaw.staffRoster || [];
+                if(dataRaw.resourceSyncStats) {
+                    const s = dataRaw.resourceSyncStats;
+                    document.getElementById('resource-sync-stats').innerText = `Last sync: ${s.foldersVisited} folder(s) checked, ${s.filesFound} file(s) found${(s.fileErrors || s.folderErrors) ? `, ${s.fileErrors + s.folderErrors} skipped due to an error` : ''}.`;
+                }
                 
                 const liveRes = dataRaw.results || [];
                 const archRes = dataRaw.archiveResults || [];
@@ -1823,7 +1828,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.22.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.23.csv`; l.click();
         }
     </script>
 </body>
