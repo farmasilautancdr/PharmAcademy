@@ -124,7 +124,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.21</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.22</span></p>
             </header>
             <p class="text-center font-bold mb-5" style="color:var(--text-muted)">Which team are you with?</p>
             <div class="space-y-4 max-w-md mx-auto">
@@ -160,7 +160,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.21</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.22</span></p>
                 <button onclick="showView('view-category-select')" class="text-xs font-bold mt-2 underline" style="color:var(--text-muted)">Switch category</button>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
@@ -168,7 +168,7 @@
                     <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--primary-soft);color:var(--primary)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div></div>
                     <h2 class="text-base md:text-xl font-bold font-display">Staff</h2>
                 </div>
-                <div data-cat="warehouse" onclick="showView('view-warehouse-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--warehouse)">
+                <div data-cat="warehouse_manager" onclick="showView('view-warehouse-staff-login')" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--warehouse)">
                     <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--warehouse-soft);color:var(--warehouse)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div></div>
                     <h2 class="text-base md:text-xl font-bold font-display">Staff</h2>
                 </div>
@@ -184,7 +184,7 @@
                     <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--supervisor-soft);color:var(--supervisor)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4.5"/></svg></div></div>
                     <h2 class="text-base md:text-xl font-bold font-display">Supervisor</h2>
                 </div>
-                <div data-cat="retail,warehouse,retail_manager,warehouse_manager" onclick="openResources()" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--resources)">
+                <div data-cat="retail_manager,warehouse_manager" onclick="openResources()" class="role-tile glass p-5 md:p-8 rounded-3xl text-center cursor-pointer active:scale-95 transition" style="border-bottom:4px solid var(--resources)">
                     <div class="mb-2 md:mb-4 flex justify-center"><div class="icon-badge" style="background:var(--resources-soft);color:var(--resources)"><svg viewBox="0 0 24 24" class="w-7 h-7 md:w-9 md:h-9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg></div></div>
                     <h2 class="text-base md:text-xl font-bold font-display">Resources</h2>
                 </div>
@@ -222,8 +222,14 @@
                     <p class="text-[11px] text-center" style="color:var(--text-muted)">Not on the list, or forgot your passcode? Ask your outlet manager.</p>
                 </div>
 
-                <div id="staff-options" class="hidden space-y-4">
+                <div id="staff-post-login-menu" class="hidden space-y-3">
                     <div id="staff-welcome" class="text-sm font-bold text-center" style="color:var(--primary)"></div>
+                    <button onclick="showStaffQuizOptions()" class="w-full btn-grad p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 12l2 2 4-4.5"/></svg>Take Quiz / Practice</button>
+                    <button onclick="openResources()" class="w-full p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border-2" style="border-color:var(--resources);color:var(--resources)"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg>View Resources</button>
+                </div>
+
+                <div id="staff-options" class="hidden space-y-4">
+                    <button onclick="backToStaffMenu()" class="nav-btn font-bold text-xs mb-1" style="color:var(--primary)">← Menu</button>
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="setLang('en')" id="lang-en" class="p-3 rounded-xl border-2 font-bold" style="border-color:var(--primary);background:var(--primary);color:white;">English</button>
                         <button onclick="setLang('ms')" id="lang-ms" class="p-3 rounded-xl border-2 font-bold" style="border-color:var(--border);">Malay</button>
@@ -262,8 +268,14 @@
                     <p class="text-[11px] text-center" style="color:var(--text-muted)">Not on the list, or forgot your passcode? Ask your warehouse manager.</p>
                 </div>
 
-                <div id="wh-staff-options" class="hidden space-y-4">
+                <div id="wh-staff-post-login-menu" class="hidden space-y-3">
                     <div id="wh-staff-welcome" class="text-sm font-bold text-center" style="color:var(--warehouse)"></div>
+                    <button onclick="showWarehouseQuizOptions()" class="w-full p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2" style="background:var(--warehouse);color:white;"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6"/><path d="M10 2v6.5L4.5 18a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 8.5V2"/><path d="M7.5 15h9"/></svg>Take Quiz / Practice</button>
+                    <button onclick="openResources()" class="w-full p-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border-2" style="border-color:var(--resources);color:var(--resources)"><svg viewBox="0 0 24 24" class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg>View Resources</button>
+                </div>
+
+                <div id="wh-staff-options" class="hidden space-y-4">
+                    <button onclick="backToWarehouseStaffMenu()" class="nav-btn font-bold text-xs mb-1" style="color:var(--warehouse)">← Menu</button>
                     <p class="text-[11px] text-center leading-snug" style="color:var(--text-muted)">Enter the practice code your warehouse manager shared — different from your login passcode above.</p>
                     <div class="flex gap-2">
                         <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="wh-ai-passcode-input" placeholder="Practice code from manager" class="flex-1 p-4 rounded-xl border text-center font-data tracking-[0.3em] font-bold" style="border-color:var(--border)">
@@ -313,7 +325,7 @@
         <div id="view-resources" class="hidden">
             <div class="glass p-6 rounded-3xl">
                 <div class="flex justify-between items-center mb-4 gap-2">
-                    <button onclick="goHome()" class="nav-btn font-bold flex-shrink-0" style="color:var(--primary)">← Back</button>
+                    <button onclick="backFromResources()" class="nav-btn font-bold flex-shrink-0" style="color:var(--primary)">← Back</button>
                     <h2 class="text-lg md:text-xl font-bold font-display text-center flex-1 flex items-center justify-center gap-2" style="color:var(--resources)"><svg viewBox="0 0 24 24" class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.5C3 3.7 3.7 3 4.5 3H11v18H4.5A1.5 1.5 0 0 1 3 19.5v-15z"/><path d="M21 4.5c0-.8-.7-1.5-1.5-1.5H13v18h6.5a1.5 1.5 0 0 0 1.5-1.5v-15z"/></svg>Training Resources</h2>
                     <button id="res-manage-btn" onclick="unlockResourceManager()" class="nav-btn font-bold text-xs px-3 rounded-xl flex-shrink-0 flex items-center gap-1.5 min-h-[40px]" style="background:var(--accent-soft);color:var(--accent-dark)"><svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>Manage</button>
                 </div>
@@ -631,7 +643,7 @@
             document.getElementById('sync-error').classList.add('hidden');
             setLoader(true, "Loading...");
             try {
-                const res = await fetch(GAS_URL);
+                const res = await fetch(GAS_URL + '?_=' + Date.now(), { cache: 'no-store' });
                 const dataRaw = await res.json();
                 allQuestions = dataRaw.questions || [];
                 allWrongAnswers = dataRaw.wrongAnswers || [];
@@ -679,6 +691,8 @@
 
         function selectCategory(cat) {
             currentCategory = cat;
+            if(cat === 'retail') { showView('view-staff-login'); return; }
+            if(cat === 'warehouse') { showView('view-warehouse-staff-login'); return; }
             applyCategoryVisibility();
             showView('view-main');
         }
@@ -704,13 +718,41 @@
             isQuizRunning = false;
             loggedInStaffName = ''; loggedInStaffOutlet = ''; loggedInDivision = '';
             document.getElementById('staff-login-fields').classList.remove('hidden');
+            document.getElementById('staff-post-login-menu').classList.add('hidden');
             document.getElementById('staff-options').classList.add('hidden');
             document.getElementById('wh-staff-login-fields').classList.remove('hidden');
+            document.getElementById('wh-staff-post-login-menu').classList.add('hidden');
             document.getElementById('wh-staff-options').classList.add('hidden');
+            if(currentCategory === 'retail' || currentCategory === 'warehouse') {
+                showView('view-category-select');
+                return;
+            }
             applyCategoryVisibility();
             showView('view-main');
         }
         function showManagerRoleSelect() { showView('view-manager-role-select'); }
+
+        // Resources is now reachable from a logged-in staff session (v1.22) —
+        // going back from it shouldn't force a re-login if they're still
+        // logged in. Managers reaching Resources via the tile grid aren't
+        // affected — they fall through to the normal goHome() behavior.
+        function backFromResources() {
+            if(loggedInDivision === 'retail') {
+                showView('view-staff-login');
+                document.getElementById('staff-login-fields').classList.add('hidden');
+                document.getElementById('staff-options').classList.add('hidden');
+                document.getElementById('staff-post-login-menu').classList.remove('hidden');
+                return;
+            }
+            if(loggedInDivision === 'warehouse') {
+                showView('view-warehouse-staff-login');
+                document.getElementById('wh-staff-login-fields').classList.add('hidden');
+                document.getElementById('wh-staff-options').classList.add('hidden');
+                document.getElementById('wh-staff-post-login-menu').classList.remove('hidden');
+                return;
+            }
+            goHome();
+        }
 
         function openResources() {
             document.getElementById('resource-manager-panel').classList.add('hidden');
@@ -1353,13 +1395,34 @@
 
             if(division === 'warehouse') {
                 document.getElementById('wh-staff-login-fields').classList.add('hidden');
-                document.getElementById('wh-staff-options').classList.remove('hidden');
+                document.getElementById('wh-staff-post-login-menu').classList.remove('hidden');
                 document.getElementById('wh-staff-welcome').innerText = `Welcome, ${name}!`;
             } else {
                 document.getElementById('staff-login-fields').classList.add('hidden');
-                document.getElementById('staff-options').classList.remove('hidden');
+                document.getElementById('staff-post-login-menu').classList.remove('hidden');
                 document.getElementById('staff-welcome').innerText = `Welcome, ${name}!`;
             }
+        }
+
+        // Post-login menu navigation — Resources sits alongside quiz options
+        // now rather than the quiz options showing immediately, since Resources
+        // access flows through this same login as of v1.22.
+        function showStaffQuizOptions() {
+            document.getElementById('staff-post-login-menu').classList.add('hidden');
+            document.getElementById('staff-options').classList.remove('hidden');
+        }
+        function backToStaffMenu() {
+            document.getElementById('staff-options').classList.add('hidden');
+            document.getElementById('ai-passcode-entry').classList.add('hidden');
+            document.getElementById('staff-post-login-menu').classList.remove('hidden');
+        }
+        function showWarehouseQuizOptions() {
+            document.getElementById('wh-staff-post-login-menu').classList.add('hidden');
+            document.getElementById('wh-staff-options').classList.remove('hidden');
+        }
+        function backToWarehouseStaffMenu() {
+            document.getElementById('wh-staff-options').classList.add('hidden');
+            document.getElementById('wh-staff-post-login-menu').classList.remove('hidden');
         }
 
         // Manage Staff — shared between Outlet Manager (retail) and Warehouse
@@ -1760,7 +1823,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.21.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.22.csv`; l.click();
         }
     </script>
 </body>
