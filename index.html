@@ -124,7 +124,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.23</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.26</span></p>
             </header>
             <p class="text-center font-bold mb-5" style="color:var(--text-muted)">Which team are you with?</p>
             <div class="space-y-4 max-w-md mx-auto">
@@ -160,7 +160,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.23</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.26</span></p>
                 <button onclick="showView('view-category-select')" class="text-xs font-bold mt-2 underline" style="color:var(--text-muted)">Switch category</button>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
@@ -338,6 +338,23 @@
                         <button onclick="document.getElementById('resource-manager-panel').classList.add('hidden')" class="text-sm font-bold min-h-[40px] px-2" style="color:var(--accent-dark)">✕ Close</button>
                     </div>
                     <p id="resource-sync-stats" class="text-[11px] font-data" style="color:var(--text-muted)"></p>
+
+                    <div class="space-y-2 p-3 rounded-xl border" style="background:var(--surface);border-color:var(--accent)">
+                        <p class="text-xs font-black uppercase tracking-widest" style="color:var(--accent-dark)">Upload a File</p>
+                        <select id="upload-category" class="w-full p-3 rounded-xl border bg-white font-bold text-sm" style="border-color:var(--border)">
+                            <option value="101 Guide to Retailing">101 Guide to Retailing</option>
+                            <option value="Housebrand Modules">Housebrand Modules</option>
+                            <option value="General Policies">General Policies</option>
+                            <option value="Warehousing Handbook">Warehousing Handbook</option>
+                            <option value="eLearning Courses">eLearning Courses</option>
+                            <option value="Halal Certificate">Halal Certificate</option>
+                        </select>
+                        <input type="file" id="upload-file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" class="w-full p-2.5 rounded-xl border bg-white text-xs" style="border-color:var(--border)">
+                        <p class="text-[10px]" style="color:var(--text-muted)">PDF, Word, PowerPoint, Excel — up to 15MB. Goes straight into the folder above, same as dropping it into Drive by hand.</p>
+                        <button onclick="uploadResourceFile()" id="upload-file-btn" class="w-full btn-grad p-3 rounded-xl font-bold text-sm">Upload File</button>
+                    </div>
+
+                    <p class="text-xs font-black uppercase tracking-widest pt-1" style="color:var(--accent-dark)">Or Type New Content</p>
                     <div class="grid grid-cols-2 gap-3">
                         <select id="kb-category" class="p-3 rounded-xl border bg-white font-bold text-sm" style="border-color:var(--border)">
                             <option value="SOP">101 Guide to Retailing</option>
@@ -600,21 +617,27 @@
         </div>
     </div>
 
-    <div id="fullscreen-reader" class="hidden fixed inset-0 z-[200]" style="background:var(--surface)">
-        <div class="flex justify-between items-center p-4 border-b" style="border-color:var(--border)">
+    <div id="fullscreen-reader" class="hidden fixed inset-0 z-[200] flex flex-col" style="background:var(--surface)">
+        <div class="flex justify-between items-center p-4 border-b flex-shrink-0" style="border-color:var(--border)">
             <p id="reader-title" class="font-bold font-display truncate pr-4"></p>
             <div class="flex gap-2 flex-shrink-0">
+                <button id="reader-orientation-btn" onclick="toggleOrientationMenu()" class="hidden font-bold text-sm px-4 py-2 rounded-xl" style="background:var(--bg);color:var(--text-muted)">⟲ Rotate</button>
                 <button id="reader-fullscreen-btn" onclick="toggleTrueFullscreen()" class="hidden font-bold text-sm px-4 py-2 rounded-xl" style="background:var(--bg);color:var(--text-muted)">⛶ Fullscreen</button>
                 <button onclick="closeFullscreenReader()" class="font-bold text-sm px-4 py-2 rounded-xl" style="background:var(--bg);color:var(--text-muted)">✕ Close</button>
             </div>
         </div>
-        <div id="reader-body" class="overflow-y-auto" style="height:calc(100% - 65px)"></div>
+        <div id="reader-orientation-menu" class="hidden flex gap-2 p-3 border-b flex-shrink-0" style="border-color:var(--border);background:var(--bg)">
+            <button onclick="setReaderOrientation('portrait')" class="flex-1 text-xs font-bold py-2.5 rounded-lg" style="background:white;color:var(--text-muted);border:1px solid var(--border)">📱 Vertical</button>
+            <button onclick="setReaderOrientation('landscape')" class="flex-1 text-xs font-bold py-2.5 rounded-lg" style="background:white;color:var(--text-muted);border:1px solid var(--border)">📱 Horizontal</button>
+            <button onclick="setReaderOrientation('auto')" class="flex-1 text-xs font-bold py-2.5 rounded-lg" style="background:white;color:var(--text-muted);border:1px solid var(--border)">↻ Auto</button>
+        </div>
+        <div id="reader-body" class="overflow-y-auto flex-1"></div>
     </div>
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyvioLEJ8tFK3766M8fj7wKxS5_qFDkKEKtniei3MHaP-aNkEq7LcwNqaVhcXgr26wKkg/exec"; 
-        let allQuestions = [], allResults = [], allReports = [], allWrongAnswers = [], allContent = [], allQuizSettings = [];
-        let allOutletNotes = [], allAIResults = [], allAIWrongAnswers = [], allReferenceDocs = [];
+        let allQuestions = [], allResults = [], allReports = [], allWrongAnswers = [], allContent = [];
+        let allAIResults = [], allAIWrongAnswers = [], allReferenceDocs = [];
         let currentLang = 'en', quizIdx = 0, score = 0, currentQuizData = [], staffWrongs = [];
         let isQuizRunning = false, isAIQuiz = false, currentOutletMgrOutlet = '', joinedPasscode = '', isEditingReport = false;
         let unlockedSupervisorPin = '';
@@ -640,6 +663,8 @@
 
         window.onload = fetchData;
 
+        let sessionToken = '';
+
         async function fetchData() {
             document.getElementById('sync-error').classList.add('hidden');
             setLoader(true, "Loading...");
@@ -647,30 +672,9 @@
                 const res = await fetch(GAS_URL + '?_=' + Date.now(), { cache: 'no-store' });
                 const dataRaw = await res.json();
                 allQuestions = dataRaw.questions || [];
-                allWrongAnswers = dataRaw.wrongAnswers || [];
-                allContent = dataRaw.content || [];
-                allQuizSettings = dataRaw.quizSettings || [];
-                allOutletNotes = dataRaw.outletNotes || [];
-                allAIResults = dataRaw.aiResults || [];
-                allAIWrongAnswers = dataRaw.aiWrongAnswers || [];
-                allReferenceDocs = dataRaw.referenceDocs || [];
                 allStaffRoster = dataRaw.staffRoster || [];
-                if(dataRaw.resourceSyncStats) {
-                    const s = dataRaw.resourceSyncStats;
-                    document.getElementById('resource-sync-stats').innerText = `Last sync: ${s.foldersVisited} folder(s) checked, ${s.filesFound} file(s) found${(s.fileErrors || s.folderErrors) ? `, ${s.fileErrors + s.folderErrors} skipped due to an error` : ''}.`;
-                }
-                
-                const liveRes = dataRaw.results || [];
-                const archRes = dataRaw.archiveResults || [];
-                allResults = [...liveRes, ...archRes];
-
-                const liveRep = dataRaw.reports || [];
-                const archRep = dataRaw.archiveReports || [];
-                allReports = [...liveRep, ...archRep];
-                
                 initDropdowns();
                 populateGlobalData();
-                renderKBList();
             } catch (e) {
                 setLoader(false);
                 document.getElementById('sync-error').classList.remove('hidden');
@@ -678,6 +682,44 @@
             }
             setLoader(false);
         }
+
+        // v1.26: everything that used to arrive in fetchData() — results,
+        // reports, wrong answers, AI results, Resources — now only comes
+        // back once a session token proves who's asking. Called right after
+        // every login/identity step succeeds, using the token issued there.
+        async function fetchScopedData() {
+            if (!sessionToken) return false;
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'get_scoped_data', token: sessionToken })
+                });
+                const data = await res.json();
+                if (!data.authorized) {
+                    alert(data.error || "Your session has expired — please log in again.");
+                    location.reload();
+                    return false;
+                }
+                allResults = [...(data.results || []), ...(data.archiveResults || [])];
+                allReports = [...(data.reports || []), ...(data.archiveReports || [])];
+                allWrongAnswers = data.wrongAnswers || [];
+                allContent = data.content || [];
+                allAIResults = data.aiResults || [];
+                allAIWrongAnswers = data.aiWrongAnswers || [];
+                allReferenceDocs = data.referenceDocs || [];
+                if (data.resourceSyncStats) {
+                    const s = data.resourceSyncStats;
+                    document.getElementById('resource-sync-stats').innerText = `Last sync: ${s.foldersVisited} folder(s) checked, ${s.filesFound} file(s) found${(s.fileErrors || s.folderErrors) ? `, ${s.fileErrors + s.folderErrors} skipped due to an error` : ''}.`;
+                }
+                populateGlobalData();
+                renderKBList();
+                return true;
+            } catch (e) {
+                alert("Couldn't reach the server — check your connection and try again.");
+                return false;
+            }
+        }
+
 
         function showView(id) {
             document.querySelectorAll('.max-w-4xl > div').forEach(v => {
@@ -703,11 +745,35 @@
         }
 
         let managerCategoryPin = '';
-        function promptManagerCategory(cat) {
+        // Checks a PIN against the backend instead of a value sitting in this
+        // file — the actual PIN never reaches the browser in either direction.
+        async function verifyPin(role, pin) {
+            if(!pin) return { authorized: false };
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'verify_pin', role, pin })
+                });
+                const data = await res.json();
+                if(data.error) { alert(data.error); return { authorized: false }; }
+                return data;
+            } catch(e) {
+                alert("Couldn't reach the server to check that — check your connection and try again.");
+                return { authorized: false };
+            }
+        }
+
+        async function promptManagerCategory(cat) {
             const pin = prompt("Enter Manager access PIN:");
             if (pin === null) return;
-            if (pin !== "FLT2026") return alert("That PIN doesn't look right.");
+            setLoader(true, "Checking...");
+            const result = await verifyPin('resources', pin);
+            if (!result.authorized) { setLoader(false); return alert("That PIN doesn't look right."); }
             managerCategoryPin = pin;
+            sessionToken = result.token || '';
+            setLoader(true, "Loading...");
+            await fetchScopedData();
+            setLoader(false);
             selectCategory(cat);
         }
 
@@ -729,6 +795,7 @@
             document.getElementById('wh-staff-post-login-menu').classList.add('hidden');
             document.getElementById('wh-staff-options').classList.add('hidden');
             if(currentCategory === 'retail' || currentCategory === 'warehouse') {
+                sessionToken = ''; // genuinely back to unauthenticated — a fresh login issues a new one
                 showView('view-category-select');
                 return;
             }
@@ -770,11 +837,16 @@
         // that still checks server-side: adding/editing/deleting materials.
         // Verified against the real SUPERVISOR_PIN on the backend, not just
         // compared to a value sitting in this file.
-        function unlockResourceManager() {
-            const pin = prompt("Enter Supervisor / Top Management password to add or manage resources:");
-            if (pin === null) return;
-            if (pin !== "SV2026") return alert("That password doesn't look right.");
-            unlockedSupervisorPin = pin;
+        async function unlockResourceManager() {
+            if (!unlockedSupervisorPin) {
+                const pin = prompt("Enter Supervisor / Top Management password to add or manage resources:");
+                if (pin === null) return;
+                setLoader(true, "Checking...");
+                const result = await verifyPin('supervisor', pin);
+                setLoader(false);
+                if (!result.authorized) return alert("That password doesn't look right.");
+                unlockedSupervisorPin = pin;
+            }
             document.getElementById('resource-manager-panel').classList.remove('hidden');
             document.getElementById('resource-manager-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
             renderKBList();
@@ -833,7 +905,7 @@
         }
 
         async function saveQuizResult() {
-            const p = { action: 'save_result', name: loggedInStaffName, outlet: loggedInStaffOutlet, topic: document.getElementById('staff-topic').value, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs };
+            const p = { action: 'save_result', name: loggedInStaffName, outlet: loggedInStaffOutlet, topic: document.getElementById('staff-topic').value, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs, token: sessionToken };
             const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
             if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
             else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
@@ -844,7 +916,7 @@
         async function saveAIQuizResult() {
             const attemptId = 'AI' + Date.now();
             const topic = (currentQuizData[0] && currentQuizData[0].topic) || (loggedInDivision === 'warehouse' ? 'Warehouse Practice' : document.getElementById('staff-topic').value) || 'General';
-            const p = { action: 'save_ai_result', attemptId, name: loggedInStaffName, outlet: loggedInStaffOutlet, topic, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs, passcode: joinedPasscode };
+            const p = { action: 'save_ai_result', attemptId, name: loggedInStaffName, outlet: loggedInStaffOutlet, topic, score: `${score}/${currentQuizData.length}`, perc: Math.round((score/currentQuizData.length) * 100) + "%", wrongAnswers: staffWrongs, passcode: joinedPasscode, token: sessionToken };
             const blob = new Blob([JSON.stringify(p)], {type: 'text/plain'});
             if (navigator.sendBeacon) navigator.sendBeacon(GAS_URL, blob);
             else fetch(GAS_URL, { method: 'POST', body: JSON.stringify(p), mode: 'no-cors' });
@@ -913,9 +985,16 @@
         /** OUTLET MANAGER: LOGIN, NOTES, AI MONITOR **/
         let quizTimerInterval = null;
 
-        function loginOutletManager() {
+        async function loginOutletManager() {
             const outlet = document.getElementById('outlet-mgr-outlet').value;
             if(!outlet) return alert("Please select your outlet.");
+            setLoader(true, "Loading your dashboard...");
+            const ok = await establishSession('outlet_manager', outlet, managerCategoryPin);
+            if(!ok) { setLoader(false); return; }
+            const scopedOk = await fetchScopedData();
+            setLoader(false);
+            if(!scopedOk) return;
+
             currentOutletMgrOutlet = outlet;
             document.getElementById('disp-outlet-mgr-code').innerText = outlet;
             populateOutletMgrDropdowns('retail');
@@ -925,9 +1004,16 @@
             showView('view-outlet-mgr-dash');
         }
 
-        function loginWarehouseManager() {
+        async function loginWarehouseManager() {
             const location = document.getElementById('wh-mgr-location').value;
             if(!location) return alert("Please select a location.");
+            setLoader(true, "Loading your dashboard...");
+            const ok = await establishSession('warehouse_manager', location, managerCategoryPin);
+            if(!ok) { setLoader(false); return; }
+            const scopedOk = await fetchScopedData();
+            setLoader(false);
+            if(!scopedOk) return;
+
             currentWarehouseMgrLocation = location;
             document.getElementById('disp-wh-mgr-location').innerText = location;
             populateOutletMgrDropdowns('warehouse');
@@ -994,7 +1080,7 @@
             try {
                 await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'end_ai_quiz', outlet })
+                    body: JSON.stringify({ action: 'end_ai_quiz', outlet, token: sessionToken })
                 });
             } catch(e) { /* best-effort — clear the UI regardless below */ }
             if(quizTimerInterval) clearInterval(quizTimerInterval);
@@ -1058,7 +1144,7 @@
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'create_ai_quiz', outlet, sourceType, sourceValue, topicLabel, count, extraNotes, manager })
+                    body: JSON.stringify({ action: 'create_ai_quiz', outlet, sourceType, sourceValue, topicLabel, count, extraNotes, manager, token: sessionToken })
                 });
                 const data = await res.json();
                 if(data.error) throw new Error(data.error);
@@ -1112,6 +1198,49 @@
         }
 
         /** KNOWLEDGE BASE (Supervisor / Top Management add; everyone can view) **/
+        async function uploadResourceFile() {
+            const fileInput = document.getElementById('upload-file-input');
+            const file = fileInput.files[0];
+            if(!file) return alert("Choose a file first.");
+            if(file.size > 15 * 1024 * 1024) return alert("That file is over 15MB — please use a smaller file, or upload it directly into Drive instead.");
+
+            const category = document.getElementById('upload-category').value;
+            const btn = document.getElementById('upload-file-btn');
+            const originalLabel = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = 'Uploading...';
+            setLoader(true, "Uploading file...");
+
+            try {
+                const base64Data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = () => reject(new Error("Couldn't read that file."));
+                    reader.readAsDataURL(file);
+                });
+
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'upload_resource_file', category,
+                        fileName: file.name, mimeType: file.type || 'application/octet-stream',
+                        base64Data, pin: unlockedSupervisorPin
+                    })
+                });
+                const data = await res.json();
+                if(data.status !== 'ok') { throw new Error(data.error || "Upload failed."); }
+
+                fileInput.value = '';
+                alert(`Uploaded — it'll appear under "${category}" the next time the page loads.`);
+            } catch(e) {
+                alert(e.message || "Couldn't reach the server — check your connection and try again.");
+            }
+
+            btn.disabled = false;
+            btn.innerText = originalLabel;
+            setLoader(false);
+        }
+
         async function addKnowledgeItem() {
             const category = document.getElementById('kb-category').value;
             const topic = document.getElementById('kb-topic').value.trim();
@@ -1175,6 +1304,7 @@
             setLoader(false);
         }
 
+        let originalViewportContent = '';
         function openFullscreenReader(title, bodyHtml) {
             document.getElementById('reader-title').innerText = title;
             document.getElementById('reader-body').innerHTML = bodyHtml;
@@ -1184,6 +1314,41 @@
             const el = document.getElementById('fullscreen-reader');
             if (el.requestFullscreen || el.webkitRequestFullscreen) fsBtn.classList.remove('hidden');
             else fsBtn.classList.add('hidden');
+
+            // Orientation locking only exists on some Android browsers (iOS
+            // Safari has never supported it), and only works while the page
+            // is in true fullscreen — hidden everywhere else, same pattern
+            // as the Fullscreen button above.
+            const orientBtn = document.getElementById('reader-orientation-btn');
+            if (window.screen && screen.orientation && typeof screen.orientation.lock === 'function') orientBtn.classList.remove('hidden');
+            else orientBtn.classList.add('hidden');
+
+            // Let people pinch-to-zoom while reading, on every phone — the
+            // app locks zoom everywhere else to stop accidental pinch-zoom on
+            // buttons, but that same lock makes a dense document hard to
+            // read. Relaxed here, restored exactly on close.
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                originalViewportContent = viewport.getAttribute('content');
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, viewport-fit=cover');
+            }
+        }
+        function toggleOrientationMenu() {
+            document.getElementById('reader-orientation-menu').classList.toggle('hidden');
+        }
+        async function setReaderOrientation(mode) {
+            document.getElementById('reader-orientation-menu').classList.add('hidden');
+            try {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    const el = document.getElementById('fullscreen-reader');
+                    if (el.requestFullscreen) await el.requestFullscreen();
+                    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                }
+                if (mode === 'auto') screen.orientation.unlock();
+                else await screen.orientation.lock(mode);
+            } catch (e) {
+                alert("This device doesn't support locking rotation from the app — try your phone's own rotation lock instead.");
+            }
         }
         function toggleTrueFullscreen() {
             const el = document.getElementById('fullscreen-reader');
@@ -1197,6 +1362,9 @@
             }
         }
         function closeFullscreenReader() {
+            try { if (window.screen && screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch(e) {}
+            document.getElementById('reader-orientation-menu').classList.add('hidden');
+
             const isFs = document.fullscreenElement || document.webkitFullscreenElement;
             if (isFs) {
                 if (document.exitFullscreen) document.exitFullscreen();
@@ -1205,6 +1373,9 @@
             document.getElementById('fullscreen-reader').classList.add('hidden');
             document.getElementById('reader-body').innerHTML = '';
             document.body.style.overflow = '';
+
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport && originalViewportContent) viewport.setAttribute('content', originalViewportContent);
         }
         function openReaderForContent(id) {
             const c = allContent.find(x => x.ID === id);
@@ -1249,7 +1420,7 @@
                             <span class="text-[9px] font-bold ml-1" style="color:var(--text-muted)">${c.Topic}</span>
                             <p class="font-bold mt-1">${c.Title}</p>
                         </div>
-                        <button onclick="openReaderForContent('${c.ID}')" class="flex-shrink-0 text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
+                        <button onclick="openReaderForContent('${c.ID}')" title="Read" aria-label="Read" class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center" style="background:var(--primary-soft);color:var(--primary-dark)"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
                     </div>
                     <p class="text-sm mt-1 line-clamp-2" style="color:var(--text-muted)">${c.Body}</p>
                     ${c.Link ? `<a href="${c.Link}" target="_blank" class="text-xs font-bold underline mt-2 inline-block" style="color:var(--primary)">Open Resource ↗</a>` : ''}
@@ -1259,13 +1430,13 @@
         function referenceDocHtml(d) {
             return `
                 <div class="bg-white p-4 rounded-xl border mb-3 flex justify-between items-center gap-2" style="border-color:var(--border)">
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-1">
                         <span class="badge" style="background:var(--accent-soft);color:var(--accent-dark)">${d.Kind}</span>
                         <p class="font-bold mt-1 truncate">${d.Name}</p>
                     </div>
-                    <div class="flex gap-2 flex-shrink-0">
-                        <button onclick="openReaderForDoc('${d.ID}')" class="text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--primary-soft);color:var(--primary-dark)">Read</button>
-                        <a href="${d.DownloadURL}" target="_blank" class="text-xs font-bold px-3 rounded-lg min-h-[40px] flex items-center justify-center" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border)">Download</a>
+                    <div class="flex gap-1.5 flex-shrink-0">
+                        <button onclick="openReaderForDoc('${d.ID}')" title="Read" aria-label="Read" class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:var(--primary-soft);color:var(--primary-dark)"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                        <a href="${d.DownloadURL}" target="_blank" title="Download" aria-label="Download" class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:var(--bg);color:var(--text-muted);border:1px solid var(--border)"><svg viewBox="0 0 24 24" class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 19h14"/></svg></a>
                     </div>
                 </div>`;
         }
@@ -1386,15 +1557,21 @@
                 const data = await res.json();
                 if(data.error) { alert(data.error); alreadyShownError = true; }
                 ok = !!data.authorized;
+                if(ok) sessionToken = data.token || '';
             } catch(e) {
                 alert("Couldn't reach the server — check your connection and try again.");
                 alreadyShownError = true;
             }
-            setLoader(false);
             if(!ok) {
+                setLoader(false);
                 if(!alreadyShownError) alert("That name/passcode combination doesn't look right.");
                 return;
             }
+
+            setLoader(true, "Loading your dashboard...");
+            const scopedOk = await fetchScopedData();
+            setLoader(false);
+            if(!scopedOk) return;
 
             loggedInStaffName = name; loggedInStaffOutlet = outlet; loggedInDivision = division;
 
@@ -1441,7 +1618,7 @@
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'get_staff_roster_full', division, outlet, pin: managerCategoryPin })
+                    body: JSON.stringify({ action: 'get_staff_roster_full', division, outlet, token: sessionToken })
                 });
                 const data = await res.json();
                 if(!data.authorized) { list.innerHTML = `<p class="text-xs text-center py-2" style="color:var(--danger-dark)">${data.error || 'Could not load roster.'}</p>`; return; }
@@ -1472,7 +1649,7 @@
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'add_staff', division, outlet, name, idNote, passcode, addedBy: (division === 'warehouse' ? 'Warehouse Manager - ' : 'Outlet Manager - ') + outlet, pin: managerCategoryPin })
+                    body: JSON.stringify({ action: 'add_staff', division, outlet, name, idNote, passcode, addedBy: (division === 'warehouse' ? 'Warehouse Manager - ' : 'Outlet Manager - ') + outlet, token: sessionToken })
                 });
                 const data = await res.json();
                 if(data.status !== 'ok') { setLoader(false); return alert(data.error || "Couldn't add that staff member."); }
@@ -1492,7 +1669,7 @@
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'remove_staff', division, outlet, name, pin: managerCategoryPin })
+                    body: JSON.stringify({ action: 'remove_staff', division, outlet, name, token: sessionToken })
                 });
                 const data = await res.json();
                 if(data.status !== 'ok') { setLoader(false); return alert(data.error || "Couldn't remove that staff member."); }
@@ -1726,22 +1903,56 @@
         }
 
         /** CORE UTILS **/
-        function loginSupervisor() {
+        // Shared by Outlet Manager, Warehouse Manager, Area Manager, and
+        // Supervisor — re-checks the relevant PIN server-side and, on
+        // success, issues a session token scoped to that specific
+        // outlet/location (or company-wide, for Supervisor).
+        async function establishSession(role, outlet, pin) {
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'establish_session', role, outlet: outlet || '', pin })
+                });
+                const data = await res.json();
+                if (!data.authorized) { alert(data.error || "That PIN doesn't look right."); return false; }
+                sessionToken = data.token || '';
+                return true;
+            } catch(e) {
+                alert("Couldn't reach the server — check your connection and try again.");
+                return false;
+            }
+        }
+
+        async function loginSupervisor() {
             const pin = document.getElementById('sup-pass').value;
-            if(pin !== "SV2026") return alert("That password doesn't look right.");
+            setLoader(true, "Checking...");
+            const ok = await establishSession('supervisor', '', pin);
+            if(!ok) { setLoader(false); return; }
+            unlockedSupervisorPin = pin; // reused below so Manage Resources doesn't ask twice in one session
+            setLoader(true, "Loading dashboard...");
+            const scopedOk = await fetchScopedData();
+            setLoader(false);
+            if(!scopedOk) return;
             showView('view-supervisor-dash');
             setTimeout(renderSupervisorStats, 200);
         }
-        function loginManager() {
+        async function loginManager() {
             const id = document.getElementById('mgr-select').value, o = document.getElementById('mgr-outlet').value;
             if(!id || !o) return alert("Please select your name and outlet.");
             const m = managerData.find(x => x.id === id);
-            if (m && m.outlets.includes(o)) {
-                document.getElementById('disp-mgr-name').innerText = id;
-                document.getElementById('disp-mgr-outlet').innerText = o;
-                showView('view-manager-form');
-                document.getElementById('existing-report-notice').classList.add('hidden');
-            } else alert("That outlet isn't assigned to you.");
+            if (!m || !m.outlets.includes(o)) return alert("That outlet isn't assigned to you.");
+
+            setLoader(true, "Loading your dashboard...");
+            const ok = await establishSession('area_manager', o, managerCategoryPin);
+            if(!ok) { setLoader(false); return; }
+            const scopedOk = await fetchScopedData();
+            setLoader(false);
+            if(!scopedOk) return;
+
+            document.getElementById('disp-mgr-name').innerText = id;
+            document.getElementById('disp-mgr-outlet').innerText = o;
+            showView('view-manager-form');
+            document.getElementById('existing-report-notice').classList.add('hidden');
         }
         function initDropdowns() {
             const opts = outletList.map(o => `<option value="${o}">${o}</option>`).join('');
@@ -1828,7 +2039,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.23.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.26.csv`; l.click();
         }
     </script>
 </body>
