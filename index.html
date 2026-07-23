@@ -124,7 +124,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.26</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.27</span></p>
             </header>
             <p class="text-center font-bold mb-5" style="color:var(--text-muted)">Which team are you with?</p>
             <div class="space-y-4 max-w-md mx-auto">
@@ -160,7 +160,7 @@
                     </svg>
                     <h1 class="text-3xl md:text-4xl font-bold tracking-tight font-display"><span style="color:var(--primary)">Pharm</span><span style="color:var(--text)">Academy</span></h1>
                 </div>
-                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.26</span></p>
+                <p class="font-medium mt-1" style="color:var(--text-muted)">Training Management <span class="badge align-middle" style="background:var(--accent);color:white;">v1.27</span></p>
                 <button onclick="showView('view-category-select')" class="text-xs font-bold mt-2 underline" style="color:var(--text-muted)">Switch category</button>
             </header>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
@@ -687,6 +687,29 @@
         // reports, wrong answers, AI results, Resources — now only comes
         // back once a session token proves who's asking. Called right after
         // every login/identity step succeeds, using the token issued there.
+        // v1.27: populates all the scoped globals from a response object —
+        // shared by the merged login responses below and by fetchScopedData
+        // itself, so there's one place this logic lives.
+        function applyScopedData(data) {
+            allResults = [...(data.results || []), ...(data.archiveResults || [])];
+            allReports = [...(data.reports || []), ...(data.archiveReports || [])];
+            allWrongAnswers = data.wrongAnswers || [];
+            allContent = data.content || [];
+            allAIResults = data.aiResults || [];
+            allAIWrongAnswers = data.aiWrongAnswers || [];
+            allReferenceDocs = data.referenceDocs || [];
+            if (data.resourceSyncStats) {
+                const s = data.resourceSyncStats;
+                document.getElementById('resource-sync-stats').innerText = `Last sync: ${s.foldersVisited} folder(s) checked, ${s.filesFound} file(s) found${(s.fileErrors || s.folderErrors) ? `, ${s.fileErrors + s.folderErrors} skipped due to an error` : ''}.`;
+            }
+            populateGlobalData();
+            renderKBList();
+        }
+
+        // Only needed now if something wants to re-fetch the current scope's
+        // data without a fresh login (e.g. a manual refresh) — every login
+        // flow gets its scoped data directly in the login response instead,
+        // as of v1.27, rather than calling this separately afterward.
         async function fetchScopedData() {
             if (!sessionToken) return false;
             try {
@@ -700,19 +723,7 @@
                     location.reload();
                     return false;
                 }
-                allResults = [...(data.results || []), ...(data.archiveResults || [])];
-                allReports = [...(data.reports || []), ...(data.archiveReports || [])];
-                allWrongAnswers = data.wrongAnswers || [];
-                allContent = data.content || [];
-                allAIResults = data.aiResults || [];
-                allAIWrongAnswers = data.aiWrongAnswers || [];
-                allReferenceDocs = data.referenceDocs || [];
-                if (data.resourceSyncStats) {
-                    const s = data.resourceSyncStats;
-                    document.getElementById('resource-sync-stats').innerText = `Last sync: ${s.foldersVisited} folder(s) checked, ${s.filesFound} file(s) found${(s.fileErrors || s.folderErrors) ? `, ${s.fileErrors + s.folderErrors} skipped due to an error` : ''}.`;
-                }
-                populateGlobalData();
-                renderKBList();
+                applyScopedData(data);
                 return true;
             } catch (e) {
                 alert("Couldn't reach the server — check your connection and try again.");
@@ -768,12 +779,11 @@
             if (pin === null) return;
             setLoader(true, "Checking...");
             const result = await verifyPin('resources', pin);
-            if (!result.authorized) { setLoader(false); return alert("That PIN doesn't look right."); }
+            setLoader(false);
+            if (!result.authorized) return alert("That PIN doesn't look right.");
             managerCategoryPin = pin;
             sessionToken = result.token || '';
-            setLoader(true, "Loading...");
-            await fetchScopedData();
-            setLoader(false);
+            applyScopedData(result); // v1.27: comes back in this same response now
             selectCategory(cat);
         }
 
@@ -990,10 +1000,8 @@
             if(!outlet) return alert("Please select your outlet.");
             setLoader(true, "Loading your dashboard...");
             const ok = await establishSession('outlet_manager', outlet, managerCategoryPin);
-            if(!ok) { setLoader(false); return; }
-            const scopedOk = await fetchScopedData();
             setLoader(false);
-            if(!scopedOk) return;
+            if(!ok) return;
 
             currentOutletMgrOutlet = outlet;
             document.getElementById('disp-outlet-mgr-code').innerText = outlet;
@@ -1009,10 +1017,8 @@
             if(!location) return alert("Please select a location.");
             setLoader(true, "Loading your dashboard...");
             const ok = await establishSession('warehouse_manager', location, managerCategoryPin);
-            if(!ok) { setLoader(false); return; }
-            const scopedOk = await fetchScopedData();
             setLoader(false);
-            if(!scopedOk) return;
+            if(!ok) return;
 
             currentWarehouseMgrLocation = location;
             document.getElementById('disp-wh-mgr-location').innerText = location;
@@ -1548,7 +1554,7 @@
             if(!/^\d{4}$/.test(passcode)) return alert("Enter your 4-digit passcode.");
 
             setLoader(true, "Checking passcode...");
-            let ok = false, alreadyShownError = false;
+            let ok = false, alreadyShownError = false, loginData = null;
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
@@ -1557,21 +1563,18 @@
                 const data = await res.json();
                 if(data.error) { alert(data.error); alreadyShownError = true; }
                 ok = !!data.authorized;
-                if(ok) sessionToken = data.token || '';
+                if(ok) { sessionToken = data.token || ''; loginData = data; }
             } catch(e) {
                 alert("Couldn't reach the server — check your connection and try again.");
                 alreadyShownError = true;
             }
+            setLoader(false);
             if(!ok) {
-                setLoader(false);
                 if(!alreadyShownError) alert("That name/passcode combination doesn't look right.");
                 return;
             }
 
-            setLoader(true, "Loading your dashboard...");
-            const scopedOk = await fetchScopedData();
-            setLoader(false);
-            if(!scopedOk) return;
+            applyScopedData(loginData); // v1.27: comes back in this same response now
 
             loggedInStaffName = name; loggedInStaffOutlet = outlet; loggedInDivision = division;
 
@@ -1916,6 +1919,7 @@
                 const data = await res.json();
                 if (!data.authorized) { alert(data.error || "That PIN doesn't look right."); return false; }
                 sessionToken = data.token || '';
+                applyScopedData(data); // v1.27: comes back in this same response now
                 return true;
             } catch(e) {
                 alert("Couldn't reach the server — check your connection and try again.");
@@ -1927,12 +1931,9 @@
             const pin = document.getElementById('sup-pass').value;
             setLoader(true, "Checking...");
             const ok = await establishSession('supervisor', '', pin);
-            if(!ok) { setLoader(false); return; }
-            unlockedSupervisorPin = pin; // reused below so Manage Resources doesn't ask twice in one session
-            setLoader(true, "Loading dashboard...");
-            const scopedOk = await fetchScopedData();
             setLoader(false);
-            if(!scopedOk) return;
+            if(!ok) return;
+            unlockedSupervisorPin = pin; // reused below so Manage Resources doesn't ask twice in one session
             showView('view-supervisor-dash');
             setTimeout(renderSupervisorStats, 200);
         }
@@ -1944,10 +1945,8 @@
 
             setLoader(true, "Loading your dashboard...");
             const ok = await establishSession('area_manager', o, managerCategoryPin);
-            if(!ok) { setLoader(false); return; }
-            const scopedOk = await fetchScopedData();
             setLoader(false);
-            if(!scopedOk) return;
+            if(!ok) return;
 
             document.getElementById('disp-mgr-name').innerText = id;
             document.getElementById('disp-mgr-outlet').innerText = o;
@@ -2039,7 +2038,7 @@
                 csv += [wrap(r.Timestamp||r.Date), wrap(r["Staff Name"]||r.Personnel), wrap(r.Manager), wrap(r["Training Title"]||r.Topic), wrap(r["Quiz Score"]), wrap(r["Competency Comments"]), wrap(r["Housebrand Focus"]), wrap(r["Performance Gaps"]), wrap(r.Recommendations), wrap(r.Outlet)].join(",") + "\n";
             });
             const b = new Blob([csv], { type: 'text/csv;charset=utf-8;' }), l = document.createElement("a");
-            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.26.csv`; l.click();
+            l.href = URL.createObjectURL(b); l.download = `PharmAcademy_Intel_v1.27.csv`; l.click();
         }
     </script>
 </body>
